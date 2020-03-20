@@ -70,7 +70,7 @@ namespace GenMapViewer
             width = (int)graphic.Width;
             height = (int)graphic.Height;
             square[0] = new SquareBrush(0, height / 2, width, height / 2);
-            square[1] = new SquareBrush(0, 0, width / 4, height / 2);
+            //square[1] = new SquareBrush(0, 0, width / 4, height / 2);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -95,10 +95,10 @@ namespace GenMapViewer
                             graphic.FillRectangle(new SolidBrush(types[TileID.Empty]), 0, 0, width, height);
                             //graphic.DrawImage(Bitmap.FromFile("output.png"), 0, 0);
                             PreDraw(bmp, graphic);
-                            foreach (Player p in player.Where(t => t != null))
-                                p.PreDraw(bmp, graphic);
                             foreach (SquareBrush sq in square.Where(t => t != null))
                                 sq.PreDraw(bmp, graphic);
+                            foreach (Player p in player.Where(t => t != null))
+                                p.PreDraw(bmp, graphic);
                         }
                     }
                     int stride = width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);

@@ -28,7 +28,7 @@ namespace GenMapViewer
             gfx.DrawRectangle(Pens.Blue, new System.Drawing.Rectangle(hitbox.x, hitbox.y, hitbox.Width, hitbox.Height));
             gfx.DrawString(velocity.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 100);
             gfx.DrawString((position.Y + plrHeight).ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
-            gfx.DrawString(square[1].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
+            gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
             gfx.DrawString(Distance(Angle(0, 0), position).X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
             base.PreDraw(bmp, gfx);
@@ -86,7 +86,8 @@ namespace GenMapViewer
             if (!KeyDown(Key.W) && KeyDown(Key.S))
             {
                 // move down
-                velocity.Y += moveSpeed;
+                if (!colDown)
+                    velocity.Y += moveSpeed;
             }
             else if (KeyDown(Key.W) && !KeyDown(Key.S))
             {
@@ -106,7 +107,7 @@ namespace GenMapViewer
                 velocity.X = 0f;
             if (colRight && velocity.X > 0f)
                 velocity.X = 0f;
-            if (colUp || colDown)
+            if (colUp)
                 velocity.Y = 0f;
             /*
             if (canJump && KeyDown(Key.Space))
@@ -127,7 +128,6 @@ namespace GenMapViewer
                 {
                     position.X = sq.X - plrWidth;
                 }
-                
                 if (colDown = sq.Hitbox.Collision(position.X + plrWidth / 2, position.Y + plrHeight))
                 {
                     position.Y = sq.Y - plrHeight;
@@ -136,7 +136,7 @@ namespace GenMapViewer
                 {
                     position.Y = sq.Y + sq.Height;
                     break;
-                }
+                }                
                 if (colLeft = sq.Hitbox.Collision(position.X, position.Y))
                 {
                     position.X = sq.X + sq.Width;
