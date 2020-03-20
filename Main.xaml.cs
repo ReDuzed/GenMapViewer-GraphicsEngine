@@ -70,6 +70,7 @@ namespace GenMapViewer
             width = (int)graphic.Width;
             height = (int)graphic.Height;
             square[0] = new SquareBrush(0, height / 2, width, height / 2);
+            square[1] = new SquareBrush(0, 0, width / 4, height / 2);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {

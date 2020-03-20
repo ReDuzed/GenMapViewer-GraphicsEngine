@@ -85,22 +85,25 @@ namespace GenMapViewer
         {
             get { return new Rectangle(); }
         }
-        public static bool Intersects(Rectangle rec1, Rectangle rec2)
+        public bool Intersects(Rectangle other)
         {
-            for (int m = rec1.x; m < rec1.x + rec1.Width; m++)
-            {
-                for (int n = rec1.y; n < rec1.y + rec1.Height; n++)
-                {
-                    if (rec2.x <= m && rec2.x + rec2.Width >= m)
-                    {
-                        if (rec2.y <= n && rec2.y + rec2.Height >= n)
-                        {
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
+            return other.x >= x && other.x <= x + Width && other.y >= y && other.y <= y + Height;
+        }
+        public bool TopCollide(float X, float Y)
+        {
+            return X >= this.x && X <= this.x + Width && Y >= this.y;
+        }
+        public bool Collision(float X, float Y)
+        {
+            return X >= this.x && X <= this.x + Width && Y >= this.y && Y <= this.y + Height;
+        }
+        public bool RightCollide(float X, float Y)
+        {
+            return X >= this.x && Y >= this.y && Y <= this.y + Height;
+        }
+        public bool LeftCollide(float X, float Y)
+        {
+            return X <= this.x + Width && Y >= this.y && Y <= this.y + Height;
         }
         public bool Contains(int X, int Y)
         {

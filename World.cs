@@ -14,6 +14,10 @@ namespace GenMapViewer
         public new int Width;
         public new int Height;
         private bool Active = true;
+        public Rectangle Hitbox
+        {
+            get { return new Rectangle(X, Y, Width, Height); }
+        }
         public bool door(bool door)
         {
             return false;

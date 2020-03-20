@@ -63,6 +63,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Legacy\Functions.cs" />
+    <Compile Include="Legacy\Random.cs" />
+    <Compile Include="TEMP\Unified.Random.cs" />
     <Compile Include="World.cs" />
     <Compile Include="LevelGen.cs" />
     <Compile Include="Player.cs" />
