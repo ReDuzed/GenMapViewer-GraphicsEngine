@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RUDD;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -121,6 +122,70 @@ namespace GenMapViewer
                 }
             }
             return false;
+        }
+    }
+    public class Dust : Main
+    {
+        public bool active;
+        public int timeLeft;
+        public int maxLife;
+        public Dust(float x, float y)
+        {
+            this.position = new Vector2(x, y);
+        }
+        public Dust(float x, float y, int width, int height, Color color)
+        {
+            this.position = new Vector2(x, y);
+            this.color = color;
+            this.width = width;
+            this.height = height;
+        }
+        public float x
+        {
+            get { return position.X; }
+        }
+        public float y
+        {
+            get { return position.Y; }
+        }
+        public new int width = 16, height = 16;
+        public int z = -1;
+        public Vector2 position;
+        public Color color;
+        public static Dust NewDust(int x, int y, int width, int height, Color color, int maxSeconds)
+        {
+            int index = 1000;
+            for (int i = 0; i < Main.dust.Length; i++)
+            {
+                if (Main.dust[i] == null || !Main.dust[i].active)
+                {
+                    index = i;
+                    break;
+                }
+                if (i == index)
+                {
+                    return Main.dust[index];
+                }
+            }
+            Main.dust[index] = new Dust(x, y, width, height, color);
+            Main.dust[index].active = true;
+            Main.dust[index].maxLife = maxSeconds;
+            return Main.dust[index];
+        }
+        int ticks;
+        protected override void Update()
+        {
+            if (ticks++ % Main.frameRate == 0)
+                timeLeft++;
+            if (timeLeft > maxLife)
+                active = false;
+        }
+        public void Draw(Bitmap bmp, Graphics gfx)
+        {
+            if (active)
+            {
+                gfx.DrawRectangle(new Pen(color), new System.Drawing.Rectangle((int)x - width / 2, (int)y - width / 2, width, height));
+            }
         }
     }
 }

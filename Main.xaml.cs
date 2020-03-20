@@ -29,7 +29,9 @@ namespace GenMapViewer
         public static Main Instance;
         public static UnifiedRandom rand;
         public static Tile[,] tile = new Tile[width, height];
-        public static SquareBrush[] square = new SquareBrush[256]; 
+        public static SquareBrush[] square = new SquareBrush[256];
+        public static Dust[] dust = new Dust[1001];
+        public static int frameRate = 150;
         public Main()
         {
             Instance = this;
@@ -78,7 +80,7 @@ namespace GenMapViewer
             Action method = null;
             method = delegate() 
             {
-                System.Threading.Thread.Sleep(1000 / 150);
+                System.Threading.Thread.Sleep(1000 / frameRate);
                 using (Bitmap bmp = new Bitmap(width, height))
                 {
                     using (Graphics graphic = Graphics.FromImage(bmp))
@@ -99,6 +101,8 @@ namespace GenMapViewer
                                 sq.PreDraw(bmp, graphic);
                             foreach (Player p in player.Where(t => t != null))
                                 p.PreDraw(bmp, graphic);
+                            foreach (Dust d in dust.Where(t => t != null))
+                                d.Draw(bmp, graphic);
                         }
                     }
                     int stride = width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
@@ -108,6 +112,9 @@ namespace GenMapViewer
                 }
                 foreach (Player p in player.Where(t => t != null))
                     p.Update();
+                foreach (Dust d in dust.Where(t => t != null))
+                    d.Update();
+                PostUpdate();
                 graphic.Dispatcher.BeginInvoke(method, System.Windows.Threading.DispatcherPriority.Background);
             };
             graphic.Dispatcher.BeginInvoke(method, System.Windows.Threading.DispatcherPriority.Background);
@@ -125,6 +132,13 @@ namespace GenMapViewer
         protected virtual void Update()
         {
             
+        }
+        protected void PostUpdate()
+        {
+            if (rand.NextDouble() > 0.90f)
+            {
+                Dust.NewDust(rand.Next(0, width), rand.Next(0, height), 16, 16, System.Drawing.Color.Green, 10);
+            }
         }
     }
 }

@@ -26,11 +26,13 @@ namespace GenMapViewer
         {
             hitbox = new Rectangle((int)position.X + width / 2 - plrWidth / 2, (int)position.Y, plrWidth, plrHeight);
             gfx.DrawRectangle(Pens.Blue, new System.Drawing.Rectangle(hitbox.x, hitbox.y, hitbox.Width, hitbox.Height));
+           
             gfx.DrawString(velocity.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 100);
             gfx.DrawString((position.Y + plrHeight).ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
             gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
             gfx.DrawString(Distance(Angle(0, 0), position).X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
+            
             base.PreDraw(bmp, gfx);
         }
         protected override void Update()
@@ -41,6 +43,7 @@ namespace GenMapViewer
             float maxSpeed = 3f;
             float stopSpeed = moveSpeed * 2f;
             float jumpSpeed = maxSpeed * 2f, fallSpeed = 0.917f;
+            
             //  Clamp
             if (velocity.X > maxSpeed)
                 velocity.X = maxSpeed;
@@ -50,20 +53,15 @@ namespace GenMapViewer
                 velocity.Y = maxSpeed;
             if (velocity.Y < -maxSpeed)
                 velocity.Y = -maxSpeed;
-            /*
-            if (velocity.Y >= fallSpeed * maxSpeed)
-                velocity.Y = fallSpeed * maxSpeed;
-               */
+
             //  Border
             canLeft = position.X >= 1;
             canRight = position.X < width - 1;
+            
             //  Positioning
             position.X += velocity.X;
             position.Y += velocity.Y;
-            /*
-            if (!canJump)
-                velocity.Y += fallSpeed;
-                */
+            
             //  Controls
             if (!KeyDown(Key.A) && KeyDown(Key.D))
             {
@@ -102,6 +100,7 @@ namespace GenMapViewer
             {
                 velocity.Y += stopSpeed;
             }
+
             //  Collision
             if (colLeft && velocity.X < 0f)
                 velocity.X = 0f;
@@ -109,18 +108,13 @@ namespace GenMapViewer
                 velocity.X = 0f;
             if (colUp)
                 velocity.Y = 0f;
-            /*
-            if (canJump && KeyDown(Key.Space))
-            {
-                velocity.Y = -jumpSpeed;
-                canJump = false;
-            }
-                */
+
             //  Movement speed set
             if (velocity.X < moveSpeed && velocity.X > -moveSpeed)
                 velocity.X = 0f;
             if (velocity.Y < moveSpeed && velocity.Y > -moveSpeed)
                 velocity.Y = 0f;
+
             //  Brush interaction
             foreach (SquareBrush sq in square.Where(t => t != null))
             {
@@ -136,35 +130,14 @@ namespace GenMapViewer
                 {
                     position.Y = sq.Y + sq.Height;
                     break;
-                }                
+                }
                 if (colLeft = sq.Hitbox.Collision(position.X, position.Y))
                 {
                     position.X = sq.X + sq.Width;
                     break;
                 }
             }
-                /*
-                foreach (SquareBrush sq in square.Where(t => t != null))
-                {
-                    var dist = Distance(Angle(sq.X, sq.Y), position);
-                    if (dist.X < 30f && dist.Y < 30f)
-                    {
-                        for (float i = 0; i < velocity.Y; i += fallSpeed)
-                        {
-                            for (int n = (int)position.X + plrWidth / 2 - 8; n < (int)position.X + plrWidth / 2 + 8; n++)
-                            {
-                                if (sq.Hitbox.Intersects(hitbox))
-                                {
-                                    canJump = true;
-                                    position.Y = sq.Y - plrHeight;
-                                    velocity.Y = 0f;
-                                }
-                            }
-                        }
-                    }
-                }
-                    */
-            }
+        }
         public float Angle(float x, float y)
         {
             return (float)Math.Atan2(position.Y - y, position.X - x);
