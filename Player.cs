@@ -31,9 +31,7 @@ namespace GenMapViewer
             gfx.DrawString((position.Y + plrHeight).ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
             gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
-            gfx.DrawString(Distance(Angle(0, 0), position).X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
-            
-            base.PreDraw(bmp, gfx);
+            gfx.DrawString(Main.frameRate.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
         }
         protected override void Update()
         {
@@ -137,16 +135,6 @@ namespace GenMapViewer
                     break;
                 }
             }
-        }
-        public float Angle(float x, float y)
-        {
-            return (float)Math.Atan2(position.Y - y, position.X - x);
-        }
-        public Vector2 Distance(float angle, Vector2 position)
-        {
-            float VelocityX = (float)(position.X + Math.Cos(angle));
-            float VelocityY = (float)(position.Y + Math.Sin(angle));
-            return new Vector2(VelocityX, VelocityY);
         }
         private new bool KeyUp(Key key)
         {

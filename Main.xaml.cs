@@ -31,7 +31,10 @@ namespace GenMapViewer
         public static Tile[,] tile = new Tile[width, height];
         public static SquareBrush[] square = new SquareBrush[256];
         public static Dust[] dust = new Dust[1001];
-        public static int frameRate = 150;
+        public static int frameRate
+        {
+            get { return 1000 / 167; }
+        }
         public Main()
         {
             Instance = this;
@@ -80,7 +83,7 @@ namespace GenMapViewer
             Action method = null;
             method = delegate() 
             {
-                System.Threading.Thread.Sleep(1000 / frameRate);
+                System.Threading.Thread.Sleep(frameRate);
                 using (Bitmap bmp = new Bitmap(width, height))
                 {
                     using (Graphics graphic = Graphics.FromImage(bmp))
@@ -137,7 +140,7 @@ namespace GenMapViewer
         {
             if (rand.NextDouble() > 0.90f)
             {
-                Dust.NewDust(rand.Next(0, width), rand.Next(0, height), 16, 16, System.Drawing.Color.Green, 10);
+                Dust.NewDust(rand.Next(0, width), rand.Next(0, height), 16, 16, rand.Next(3), System.Drawing.Color.Green, 20);
             }
         }
     }

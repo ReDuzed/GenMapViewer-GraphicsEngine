@@ -129,6 +129,7 @@ namespace GenMapViewer
         public bool active;
         public int timeLeft;
         public int maxLife;
+        public int type;
         public Dust(float x, float y)
         {
             this.position = new Vector2(x, y);
@@ -152,7 +153,7 @@ namespace GenMapViewer
         public int z = -1;
         public Vector2 position;
         public Color color;
-        public static Dust NewDust(int x, int y, int width, int height, Color color, int maxSeconds)
+        public static Dust NewDust(int x, int y, int width, int height, int type, Color color, int maxSeconds)
         {
             int index = 1000;
             for (int i = 0; i < Main.dust.Length; i++)
@@ -168,6 +169,7 @@ namespace GenMapViewer
                 }
             }
             Main.dust[index] = new Dust(x, y, width, height, color);
+            Main.dust[index].type = type;
             Main.dust[index].active = true;
             Main.dust[index].maxLife = maxSeconds;
             return Main.dust[index];
@@ -175,6 +177,7 @@ namespace GenMapViewer
         int ticks;
         protected override void Update()
         {
+            Effect();
             if (ticks++ % Main.frameRate == 0)
                 timeLeft++;
             if (timeLeft > maxLife)
@@ -185,6 +188,21 @@ namespace GenMapViewer
             if (active)
             {
                 gfx.DrawRectangle(new Pen(color), new System.Drawing.Rectangle((int)x - width / 2, (int)y - width / 2, width, height));
+            }
+        }
+        private new void Effect()
+        {
+            switch (type)
+            {
+                case 0:
+                    color = Color.Green;
+                    break;
+                case 1:
+                    color = Color.Red;
+                    break;
+                case 2:
+                    color = Color.Yellow;
+                    break;
             }
         }
     }

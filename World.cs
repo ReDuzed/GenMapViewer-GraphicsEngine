@@ -36,10 +36,10 @@ namespace GenMapViewer
         }
         protected override void PreDraw(Bitmap bmp, Graphics gfx)
         {
-            gfx.FillRectangle(Brushes.Red, new System.Drawing.Rectangle(Hitbox.x, Hitbox.y, width, height));
-            /*
             if (!Active)
                 return;
+            //gfx.FillRectangle(Brushes.Red, new System.Drawing.Rectangle(Hitbox.x, Hitbox.y, Width, Height));
+            
             gfx.DrawPolygon(Pens.White, new Point[]
             {
                 new Point(X, Y),
@@ -51,7 +51,7 @@ namespace GenMapViewer
                 new Point(X + Width - 1, Y),
                 new Point(X + Width - 1, Y + Height),
                 new Point(X - 1, Y + Height - 1)
-            });*/
+            });
         }
     }
 }
