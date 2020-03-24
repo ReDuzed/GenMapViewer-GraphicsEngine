@@ -74,8 +74,6 @@ namespace GenMapViewer
         {
             width = (int)graphic.Width;
             height = (int)graphic.Height;
-            square[0] = new SquareBrush(0, height / 2, width, height / 2);
-            //square[1] = new SquareBrush(0, 0, width / 4, height / 2);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -91,11 +89,14 @@ namespace GenMapViewer
                         if (once)
                         {
                             player[0] = new Player();
+                            player[0].position = Vector2.Zero;
                             //level = new LevelGen().Generate(bmp);
                             once = false;
                         }
                         else
                         {
+                            translate.X = player[0].position.X + width / 2;
+                            translate.Y = player[0].position.Y + height / 2;
                             graphic.Clear(types[TileID.Empty]);
                             graphic.FillRectangle(new SolidBrush(types[TileID.Empty]), 0, 0, width, height);
                             //graphic.DrawImage(Bitmap.FromFile("output.png"), 0, 0);

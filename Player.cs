@@ -19,22 +19,23 @@ namespace GenMapViewer
             get { return new Vector2(position.X + plrWidth / 2, position.Y + plrHeight / 2); }
         }
         private bool canJump;
-        private const int plrWidth = 32, plrHeight = 48;
-        private Rectangle hitbox;
+        public const int plrWidth = 32, plrHeight = 48;
+        public Rectangle hitbox;
         private bool colUp, colDown, colRight, colLeft;
         protected override void PreDraw(Bitmap bmp, Graphics gfx)
         {
-            hitbox = new Rectangle((int)position.X + width / 2 - plrWidth / 2, (int)position.Y, plrWidth, plrHeight);
             gfx.DrawRectangle(Pens.Blue, new System.Drawing.Rectangle(hitbox.x, hitbox.y, hitbox.Width, hitbox.Height));
            
             gfx.DrawString(velocity.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 100);
             gfx.DrawString((position.Y + plrHeight).ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
-            gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
+            //gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
             gfx.DrawString(Main.frameRate.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
         }
         protected override void Update()
         {
+            hitbox = new Rectangle((int)position.X + width / 2 - plrWidth / 2, (int)position.Y, plrWidth, plrHeight);
+
             //  Initializing
             bool canLeft = true, canRight = true;
             float moveSpeed = 0.15f;
