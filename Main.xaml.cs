@@ -62,6 +62,7 @@ namespace GenMapViewer
         public static int height;
         public static Bitmap level;
         public static Player[] player = new Player[256];
+        private float ScreenX, ScreenY;
         public static System.Drawing.Color[] types = new System.Drawing.Color[]
         {
             System.Drawing.Color.Black,
@@ -70,10 +71,16 @@ namespace GenMapViewer
             System.Drawing.Color.Brown,
             System.Drawing.Color.Green
         };
+        public static Player LocalPlayer
+        {
+            get { return player[0]; }
+        }
+
         protected virtual void Initialize()
         {
             width = (int)graphic.Width;
             height = (int)graphic.Height;
+            //square[0] = new SquareBrush(0, height / 2, width, height / 2);
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -89,14 +96,22 @@ namespace GenMapViewer
                         if (once)
                         {
                             player[0] = new Player();
-                            player[0].position = Vector2.Zero;
+                            player[0].position = new Vector2(width / 2, height / 2);
                             //level = new LevelGen().Generate(bmp);
                             once = false;
                         }
                         else
                         {
-                            translate.X = player[0].position.X + width / 2;
-                            translate.Y = player[0].position.Y + height / 2;
+                            if (LocalPlayer.IsMoving())
+                            {
+                                ScreenX -= player[0].velocity.X;
+                                ScreenY -= player[0].velocity.Y;
+                            }
+                            graphic.RenderingOrigin = new System.Drawing.Point((int)LocalPlayer.position.X, (int)LocalPlayer.position.Y);
+                            graphic.TranslateTransform(
+                                ScreenX + player[0].velocity.X,
+                                ScreenY + player[0].velocity.Y,
+                                System.Drawing.Drawing2D.MatrixOrder.Append);
                             graphic.Clear(types[TileID.Empty]);
                             graphic.FillRectangle(new SolidBrush(types[TileID.Empty]), 0, 0, width, height);
                             //graphic.DrawImage(Bitmap.FromFile("output.png"), 0, 0);

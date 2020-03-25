@@ -27,14 +27,15 @@ namespace GenMapViewer
             gfx.DrawRectangle(Pens.Blue, new System.Drawing.Rectangle(hitbox.x, hitbox.y, hitbox.Width, hitbox.Height));
            
             gfx.DrawString(velocity.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 100);
-            gfx.DrawString((position.Y + plrHeight).ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
+            gfx.DrawString(position.Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
+            gfx.DrawString(position.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             //gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
             gfx.DrawString(Main.frameRate.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
         }
         protected override void Update()
         {
-            hitbox = new Rectangle((int)position.X + width / 2 - plrWidth / 2, (int)position.Y, plrWidth, plrHeight);
+            hitbox = new Rectangle((int)position.X, (int)position.Y, plrWidth, plrHeight);
 
             //  Initializing
             bool canLeft = true, canRight = true;
@@ -144,6 +145,10 @@ namespace GenMapViewer
         private new bool KeyDown(Key key)
         {
             return Keyboard.IsKeyDown(key);
+        }
+        public bool IsMoving()
+        {
+            return KeyDown(Key.W) || KeyDown(Key.A) || KeyDown(Key.S) || KeyDown(Key.D) || velocity.X > 0f || velocity.X < 0f || velocity.Y > 0f || velocity.Y < 0f;
         }
     }
 }
