@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Terraria.Utilities;
+using GenMapViewer.NPCs;
 
 namespace GenMapViewer
 {
@@ -124,12 +125,8 @@ namespace GenMapViewer
             return false;
         }
     }
-    public class Dust : Main
+    public class Dust : Entity
     {
-        public bool active;
-        public int timeLeft;
-        public int maxLife;
-        public int type;
         public Dust(float x, float y)
         {
             this.position = new Vector2(x, y);
@@ -151,9 +148,7 @@ namespace GenMapViewer
         }
         public new int width = 16, height = 16;
         public int z = -1;
-        public Vector2 position;
-        public Color color;
-        public static Dust NewDust(int x, int y, int width, int height, int type, Color color, int maxSeconds)
+        public static Dust NewDust(int x, int y, int width, int height, int type, Color color, int maxLife)
         {
             int index = 1000;
             for (int i = 0; i < Main.dust.Length; i++)
@@ -171,17 +166,20 @@ namespace GenMapViewer
             Main.dust[index] = new Dust(x, y, width, height, color);
             Main.dust[index].type = type;
             Main.dust[index].active = true;
-            Main.dust[index].maxLife = maxSeconds;
+            Main.dust[index].maxLife = maxLife;
+            Main.dust[index].whoAmI = index;
             return Main.dust[index];
         }
         int ticks;
         protected override void Update()
         {
             Effect();
-            if (ticks++ % Main.frameRate == 0)
+            if (ticks++ % Main.frameRate * 15 == 0)
                 timeLeft++;
             if (timeLeft > maxLife)
-                active = false;
+            {
+                Kill();
+            }
         }
         public void Draw(Bitmap bmp, Graphics gfx)
         {
@@ -204,6 +202,211 @@ namespace GenMapViewer
                     color = Color.Yellow;
                     break;
             }
+        }
+        public void Kill()
+        {
+            Main.dust[whoAmI].active = false;
+        }
+    }
+
+    public class NPC : Entity
+    {
+        public NPC()
+        {
+
+        }
+        public static NPC NewNPC(int x, int y, int type, Color color, int maxLife)
+        {
+            int index = 500;
+            for (int i = 0; i < Main.npc.Length; i++)
+            {
+                if (Main.npc[i] == null || !Main.npc[i].active)
+                {
+                    index = i;
+                    break;
+                }
+                if (i == index)
+                {
+                    return Main.npc[index];
+                }
+            }
+            Main.npc[index] = new NPC();
+            Main.npc[index].position = new Vector2(x, y);
+            Main.npc[index].type = type;
+            Main.npc[index].active = true;
+            Main.npc[index].maxLife = maxLife;
+            Main.npc[index].color = color;
+            Main.npc[index].whoAmI = index;
+            Main.npc[index].Initialize();
+            return Main.npc[index];
+        }
+        private new void Initialize()
+        {
+            switch (type)
+            {
+                case -1:
+                    width = 176;
+                    height = 192;
+                    Name = "Necrosis";
+                    texture = Bitmap.FromFile(NpcTexture(Name));
+                    break;
+            }
+        }
+        protected override void Update()
+        {
+            switch (type)
+            {
+                case -1:
+                    hitbox = new Rectangle((int)position.X, (int)position.Y, width, height);
+                    break;
+            }
+        }
+        private int ticks;
+        private Dust target;
+        float moveSpeed = 0.15f;
+        float maxSpeed = 3f;
+        float stopSpeed
+        {
+            get { return moveSpeed; }
+        }
+        float jumpSpeed
+        {
+            get { return maxSpeed; }
+        }
+        public void AI()
+        {
+            switch (type)
+            {
+                case -1:
+                    if (velocity.X > maxSpeed)
+                        velocity.X = maxSpeed;
+                    if (velocity.X < -maxSpeed)
+                        velocity.X = -maxSpeed;
+                    if (velocity.Y > maxSpeed)
+                        velocity.Y = maxSpeed;
+                    if (velocity.Y < -maxSpeed)
+                        velocity.Y = -maxSpeed;
+                    if (target == null || !target.active)
+                        target = Main.dust.Where(t => t != null).ToArray()[0];
+                    if (target.active)
+                    {
+                        position.X += velocity.X;
+                        position.Y += velocity.Y;
+                        if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                        {
+                            var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
+                            velocity.X += speed.X;
+                            velocity.Y += speed.Y;
+                        }
+                        else target.Kill();
+                    }
+                    if (ticks++ >= 600)
+                        ticks = 1;
+                    break;
+            }
+        }
+        public static Vector2 AngleToSpeed(float angle, float amount)
+        {
+            float cos = (float)(amount * Math.Cos(angle));
+            float sine = (float)(amount * Math.Sin(angle));
+            return new Vector2(cos, sine);
+        }
+        protected override void PreDraw(Bitmap bmp, Graphics gfx)
+        {
+            gfx.DrawImage(texture, new Point((int)position.X, (int)position.Y));
+        }
+        private string NpcTexture(string name)
+        {
+            return "Textures\\" + name + ".png";
+        }
+    }
+
+    public class Projectile : Entity
+    {
+        private new void Initialize()
+        {
+            switch (type)
+            {
+                case -1:
+                    width = 38;
+                    height = 44;
+                    timeLeft = maxLife;
+                    Name = "Orb";
+                    texture = Bitmap.FromFile(ProjTexture(Name));
+                    break;
+            }
+        }
+        private string ProjTexture(string name)
+        {
+            return "Textures\\" + name + ".png";
+        }
+        public static Projectile NewProjectile(int x, int y, int type, Color color, int maxTime)
+        {
+            int index = 1001;
+            for (int i = 0; i < Main.projectile.Length; i++)
+            {
+                if (Main.projectile[i] == null || !Main.projectile[i].active)
+                {
+                    index = i;
+                    break;
+                }
+                if (i == index)
+                {
+                    return Main.projectile[index];
+                }
+            }
+            Main.projectile[index] = new Projectile();
+            Main.projectile[index].position = new Vector2(x, y);
+            Main.projectile[index].type = type;
+            Main.projectile[index].active = true;
+            Main.projectile[index].maxLife = maxTime;
+            Main.projectile[index].color = color;
+            Main.projectile[index].whoAmI = index;
+            Main.projectile[index].Initialize();
+            return Main.projectile[index];
+        }
+        public void AI()
+        {
+            switch (type)
+            {
+                case -1:
+                    if (style == 0)
+                    {
+
+                    }
+                    break;
+            }
+        }
+        public static Vector2 AngleToSpeed(float angle, float amount)
+        {
+            float cos = (float)(amount * Math.Cos(angle));
+            float sine = (float)(amount * Math.Sin(angle));
+            return new Vector2(cos, sine);
+        }
+        protected override void Update()
+        {
+            if (timeLeft++ > maxLife)
+            {
+                Kill();
+            }
+        }
+        public void Kill()
+        {
+            Main.projectile[whoAmI].active = false;
+        }
+        int ticks;
+        int frameY;
+        int totalFrames = 7;
+        protected override void PreDraw(Bitmap bmp, Graphics gfx)
+        {
+            if (texture == null)
+                return;
+            int frameHeight = height;
+            if (ticks++ % 5 == 0)
+                frameY++;
+            if (frameY == totalFrames)
+                frameY = 0;
+            gfx.DrawImage(texture, new RectangleF(position.X, position.Y, width, height), new RectangleF(0, frameY * frameHeight, width, height), GraphicsUnit.Pixel);
         }
     }
 }

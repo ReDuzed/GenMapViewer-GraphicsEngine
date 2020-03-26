@@ -10,17 +10,12 @@ using RUDD;
 
 namespace GenMapViewer
 {
-    public class Player : Main
+    public class Player : Entity
     {
-        public Vector2 position;
-        public Vector2 velocity;
-        public Vector2 Center
-        {
-            get { return new Vector2(position.X + plrWidth / 2, position.Y + plrHeight / 2); }
-        }
+        
         private bool canJump;
         public const int plrWidth = 32, plrHeight = 48;
-        public Rectangle hitbox;
+        
         private bool colUp, colDown, colRight, colLeft;
         protected override void PreDraw(Bitmap bmp, Graphics gfx)
         {

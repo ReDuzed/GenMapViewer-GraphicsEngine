@@ -9,6 +9,7 @@ using Terraria.Utilities;
 
 namespace GenMapViewer.Biome
 {
+    /*
     public class MagnoDen
     {
         public static bool active = true;

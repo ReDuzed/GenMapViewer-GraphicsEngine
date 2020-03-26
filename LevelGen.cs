@@ -9,6 +9,7 @@ using RUDD;
 
 namespace GenMapViewer
 {
+    /*
     public class LevelGen : Main
     {
         public Bitmap Generate(Bitmap bmp)
@@ -1039,5 +1040,5 @@ namespace GenMapViewer
             }
             //progress.Value = 1f;
         }
-    }
+    }*/
 }
