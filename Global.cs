@@ -203,9 +203,20 @@ namespace GenMapViewer
                     break;
             }
         }
-        public void Kill()
+        public void Kill(bool explode = false)
         {
             Main.dust[whoAmI].active = false;
+            if (active && explode && Main.rand.NextDouble() >= 0.50f)
+            {
+                Projectile.NewProjectile((int)position.X, (int)position.Y, Main.rand.Next(-2, 2), Main.rand.Next(-2, 2), -1, Color.Purple, 600);
+            }
+        }
+        public class Waypoint
+        {
+            public const int
+                Green = 0,
+                Red = 1,
+                Yellow = 2;
         }
     }
 
@@ -248,9 +259,13 @@ namespace GenMapViewer
                     width = 176;
                     height = 192;
                     Name = "Necrosis";
-                    texture = Bitmap.FromFile(NpcTexture(Name));
+                    texture = FromFile(Name);
                     break;
             }
+        }
+        private Image FromFile(string Name)
+        {
+            return Bitmap.FromFile(NpcTexture(Name));
         }
         protected override void Update()
         {
@@ -262,9 +277,11 @@ namespace GenMapViewer
             }
         }
         private int ticks;
+        private int proj;
         private Dust target;
         float moveSpeed = 0.15f;
         float maxSpeed = 3f;
+        private Projectile[] orb = new Projectile[5];
         float stopSpeed
         {
             get { return moveSpeed; }
@@ -273,6 +290,16 @@ namespace GenMapViewer
         {
             get { return maxSpeed; }
         }
+        public Dust pickRand()
+        {
+            var list = Main.dust.Where(t => t != null).ToArray();
+            return list[Main.rand.Next(list.Length)];
+        }
+        private bool launch;
+        private bool redPhase;
+        private int timer, timer2;
+        private int redOrbsCollected;
+        private Dust[] targets = new Dust[1001];
         public void AI()
         {
             switch (type)
@@ -287,23 +314,106 @@ namespace GenMapViewer
                     if (velocity.Y < -maxSpeed)
                         velocity.Y = -maxSpeed;
                     if (target == null || !target.active)
-                        target = Main.dust.Where(t => t != null).ToArray()[0];
+                    {
+                        target = pickRand();
+                        ticks = 0;
+                        proj = 0;
+                        launch = false;
+                    }
                     if (target.active)
                     {
+                        if (target.type != Dust.Waypoint.Yellow && scale < 1f)
+                            scale += 0.1f;
+
                         position.X += velocity.X;
                         position.Y += velocity.Y;
-                        if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                        switch (target.type)
                         {
-                            var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
-                            velocity.X += speed.X;
-                            velocity.Y += speed.Y;
+                            case Dust.Waypoint.Green:
+                                if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                                {
+                                    var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
+                                    velocity.X += speed.X;
+                                    velocity.Y += speed.Y;
+                                }
+                                else
+                                {
+                                    target.Kill();
+                                }
+                                break;
+                            case Dust.Waypoint.Yellow:
+                                if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                                {
+                                    var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
+                                    velocity.X += speed.X;
+                                    velocity.Y += speed.Y;
+                                }
+                                else
+                                {
+                                    if (scale > 0.1f)
+                                        scale -= 0.1f;
+                                    else
+                                    {
+                                        target.Kill();
+                                        while ((target = pickRand()).type != Dust.Waypoint.Yellow)
+                                        { 
+                                            position = target.position;
+                                            break;
+                                        }
+                                    }
+                                }
+                                break;
+                            case Dust.Waypoint.Red:
+                                //  player kill red orbs before collected
+
+                                if (velocity.X > stopSpeed)
+                                    velocity.X = stopSpeed;
+                                if (velocity.X < -stopSpeed)
+                                    velocity.X = -stopSpeed;
+                                if (velocity.Y > stopSpeed)
+                                    velocity.Y = stopSpeed;
+                                if (velocity.Y < -stopSpeed)
+                                    velocity.Y = -stopSpeed;
+
+                                if (!launch)
+                                {
+                                    redOrbsCollected++;
+                                    Vector2 speed = AngleToSpeed(AngleTo(position, Main.LocalPlayer.position), 4f);
+                                    orb[proj] = Projectile.NewProjectile((int)position.X - 16, (int)position.Y - 16, speed.X, speed.Y, -1, Color.White, 300);
+                                    launch = true;
+                                }
+                                if (Distance(position, orb[proj].position).X > 300)
+                                {
+                                    orb[proj].Kill();
+                                }
+                                break;
                         }
-                        else target.Kill();
                     }
                     if (ticks++ >= 600)
                         ticks = 1;
+                    if (redOrbsCollected >= 4)
+                    {
+                        if (!redPhase && (scale -= 0.1f) <= 0.3f)
+                        {
+                            targets = Main.dust.Where(t => t != null && t.active && Distance(t.position, position).X < 300f && Distance(t.position, position).Y < 300f && Main.rand.NextDouble() >= 0.34f).ToArray();
+                            redPhase = true;
+                        }
+                        maxSpeed = 4f;
+                    }
+                    if (redPhase)
+                    {
+                        if (timer++ > 600)
+                        {
+                            timer = 0;
+                            redPhase = false;
+                        }
+                    }
                     break;
             }
+        }
+        public static float AngleTo(Vector2 from, Vector2 to)
+        {
+            return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
         }
         public static Vector2 AngleToSpeed(float angle, float amount)
         {
@@ -313,11 +423,37 @@ namespace GenMapViewer
         }
         protected override void PreDraw(Bitmap bmp, Graphics gfx)
         {
-            gfx.DrawImage(texture, new Point((int)position.X, (int)position.Y));
+            gfx.DrawImage(texture, new RectangleF(position.X, position.Y, width * scale, height * scale), new RectangleF(0, 0, width, height), GraphicsUnit.Pixel);
+            if (redPhase)
+            {
+                Point[] point = new Point[targets.Length];
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    point[i] = new Point((int)targets[i].position.X, (int)targets[i].position.Y);
+                }
+                if (point.Length > 0)
+                {
+                    point[0] = new Point((int)position.X, (int)position.Y + 20);
+                    if (timer % 2 == 0)
+                        timer2++;
+                    if (timer2 < point.Length)
+                    {
+                        gfx.DrawLine(Pens.White, point[0], point[timer2]);
+                        targets[timer2].Kill(true);
+                    }
+                    else timer2 = 0;
+                }
+            }
         }
         private string NpcTexture(string name)
         {
             return "Textures\\" + name + ".png";
+        }
+        public static Vector2 Distance(Vector2 one, Vector2 two) 
+        {
+            float width = one.X - two.X;
+            float height = one.Y - two.Y;
+            return new Vector2(Math.Abs(width), Math.Abs(height));
         }
     }
 
@@ -330,7 +466,7 @@ namespace GenMapViewer
                 case -1:
                     width = 38;
                     height = 44;
-                    timeLeft = maxLife;
+                    style = 0;
                     Name = "Orb";
                     texture = Bitmap.FromFile(ProjTexture(Name));
                     break;
@@ -339,6 +475,32 @@ namespace GenMapViewer
         private string ProjTexture(string name)
         {
             return "Textures\\" + name + ".png";
+        }
+        public static Projectile NewProjectile(int x, int y, float speedX, float speedY, int type, Color color, int maxTime)
+        {
+            int index = 1001;
+            for (int i = 0; i < Main.projectile.Length; i++)
+            {
+                if (Main.projectile[i] == null || !Main.projectile[i].active)
+                {
+                    index = i;
+                    break;
+                }
+                if (i == index)
+                {
+                    return Main.projectile[index];
+                }
+            }
+            Main.projectile[index] = new Projectile();
+            Main.projectile[index].position = new Vector2(x, y);
+            Main.projectile[index].velocity = new Vector2(speedX, speedY);
+            Main.projectile[index].type = type;
+            Main.projectile[index].active = true;
+            Main.projectile[index].maxLife = maxTime;
+            Main.projectile[index].color = color;
+            Main.projectile[index].whoAmI = index;
+            Main.projectile[index].Initialize();
+            return Main.projectile[index];
         }
         public static Projectile NewProjectile(int x, int y, int type, Color color, int maxTime)
         {
@@ -365,15 +527,32 @@ namespace GenMapViewer
             Main.projectile[index].Initialize();
             return Main.projectile[index];
         }
+        float moveSpeed = 0.15f;
+        float maxSpeed = 4f;
+        float stopSpeed
+        {
+            get { return moveSpeed; }
+        }
+        float jumpSpeed
+        {
+            get { return maxSpeed; }
+        }
         public void AI()
         {
             switch (type)
             {
                 case -1:
-                    if (style == 0)
-                    {
+                    if (velocity.X > maxSpeed)
+                        velocity.X = maxSpeed;
+                    if (velocity.X < -maxSpeed)
+                        velocity.X = -maxSpeed;
+                    if (velocity.Y > maxSpeed)
+                        velocity.Y = maxSpeed;
+                    if (velocity.Y < -maxSpeed)
+                        velocity.Y = -maxSpeed;
 
-                    }
+                    position.X += velocity.X;
+                    position.Y += velocity.Y;
                     break;
             }
         }
@@ -399,7 +578,7 @@ namespace GenMapViewer
         int totalFrames = 7;
         protected override void PreDraw(Bitmap bmp, Graphics gfx)
         {
-            if (texture == null)
+            if (texture == null || !active)
                 return;
             int frameHeight = height;
             if (ticks++ % 5 == 0)

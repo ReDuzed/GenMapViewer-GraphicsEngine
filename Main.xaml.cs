@@ -146,7 +146,10 @@ namespace GenMapViewer
                     n.AI();
                 }
                 foreach (Projectile pr in projectile.Where(t => t != null))
+                {
                     pr.Update();
+                    pr.AI();
+                }
                 foreach (Dust d in dust.Where(t => t != null))
                     d.Update();
                 PostUpdate();

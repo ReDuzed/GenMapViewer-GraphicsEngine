@@ -19,6 +19,7 @@ namespace GenMapViewer
         public Vector2 position;
         public Vector2 velocity;
         public int whoAmI;
+        public float scale = 1f;
         public Vector2 Center
         {
             get { return new Vector2(position.X + width / 2, position.Y + height / 2); }
