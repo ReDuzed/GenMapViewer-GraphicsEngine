@@ -95,7 +95,7 @@ namespace GenMapViewer
         {
             return X >= this.x && X <= this.x + Width && Y >= this.y;
         }
-        public bool Collision(float X, float Y)
+        public bool Contains(float X, float Y)
         {
             return X >= this.x && X <= this.x + Width && Y >= this.y && Y <= this.y + Height;
         }
@@ -330,7 +330,7 @@ namespace GenMapViewer
                         switch (target.type)
                         {
                             case Dust.Waypoint.Green:
-                                if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                                if (!this.hitbox.Contains(target.Center.X, target.Center.Y))
                                 {
                                     var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
                                     velocity.X += speed.X;
@@ -342,7 +342,7 @@ namespace GenMapViewer
                                 }
                                 break;
                             case Dust.Waypoint.Yellow:
-                                if (!this.hitbox.Collision(target.Center.X, target.Center.Y))
+                                if (!this.hitbox.Contains(target.Center.X, target.Center.Y))
                                 {
                                     var speed = AngleToSpeed((float)Math.Atan2(position.Y - target.position.Y, position.X - target.position.X) + 180f * Draw.radian, moveSpeed);
                                     velocity.X += speed.X;

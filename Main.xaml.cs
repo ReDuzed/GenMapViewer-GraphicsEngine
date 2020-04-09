@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,11 +38,15 @@ namespace GenMapViewer
         {
             get { return 1000 / 167; }
         }
+        public static bool Logo = true;  
+        Action method2;
         public Main()
         {
             Instance = this;
             rand = new UnifiedRandom();
             InitializeComponent();
+            Initialize();
+            LogoDisplay();
         }
         /*
         public static int rightWorld
@@ -85,13 +90,44 @@ namespace GenMapViewer
             ScreenHeight = (int)graphic.Height;
             //square[0] = new SquareBrush(0, height / 2, width, height / 2);
         }
+        private void LogoDisplay()
+        {
+            method2 = null;
+            //  Todo draw thread separate from input thread
+            Thread thread = new Thread(t =>
+            {
+                Main m = (Main)t;
+                method2 = delegate ()
+                {
+                    if (!Main.Logo)
+                        return;
+                    System.Threading.Thread.Sleep(Main.frameRate);
+                    using (Bitmap bmp = new Bitmap((int)m.logo.Width, (int)m.logo.Height))
+                    {
+                        using (Graphics graphic = Graphics.FromImage(bmp))
+                        {
+                            graphic.DrawString("Demo", System.Drawing.SystemFonts.DefaultFont, System.Drawing.Brushes.Red, 10, 30);
+                        }
+                        int stride = (int)m.logo.Width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
+                        var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, (int)m.logo.Width, (int)m.logo.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        m.logo.Source = BitmapSource.Create((int)m.logo.Width, (int)m.logo.Height, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * (int)m.logo.Height, stride);
+                        bmp.UnlockBits(data);
+                    }
+                    m.logo.Dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
+                };
+                m.logo.Dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
+            });
+            thread.IsBackground = true;
+            thread.Start(this);
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            Initialize();
+            Logo = false;
+            logo.IsEnabled = false;
+            logo.Visibility = Visibility.Hidden;
             Action method = null;
             method = delegate() 
             {
-                
                 System.Threading.Thread.Sleep(frameRate);
                 using (Bitmap bmp = new Bitmap(ScreenWidth, ScreenHeight))
                 {
@@ -190,6 +226,11 @@ namespace GenMapViewer
             {
                 Dust.NewDust(rand.Next(0, ScreenWidth), rand.Next(0, ScreenHeight), 16, 16, rand.Next(3), System.Drawing.Color.Green, 150);
             }
+        }
+        public Vector2 MousePosition()
+        {
+            var mouse = Mouse.GetPosition(graphic);
+            return new Vector2((float)mouse.X, (float)mouse.Y);
         }
     }
 }

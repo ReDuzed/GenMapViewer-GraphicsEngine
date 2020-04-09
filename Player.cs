@@ -14,6 +14,7 @@ namespace GenMapViewer
     {
         
         private bool canJump;
+        private bool clamp;
         public const int plrWidth = 32, plrHeight = 48;
         
         private bool colUp, colDown, colRight, colLeft;
@@ -27,6 +28,10 @@ namespace GenMapViewer
             //gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
             gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
             gfx.DrawString(Main.frameRate.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
+            gfx.DrawString(Instance.MousePosition().X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 160);
+            gfx.DrawString(Instance.MousePosition().Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 172);
+            gfx.DrawString(fuel.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 184);
+
         }
         protected override void Update()
         {
@@ -36,8 +41,9 @@ namespace GenMapViewer
             bool canLeft = true, canRight = true;
             float moveSpeed = 0.15f;
             float maxSpeed = 3f;
+            float boosted = 4f;
             float stopSpeed = moveSpeed * 2f;
-            float jumpSpeed = maxSpeed * 2f, fallSpeed = 0.917f;
+            float jumpSpeed = maxSpeed * 2f * (!clamp ? boosted : 1f), fallSpeed = 0.917f;
             
             //  Clamp
             if (velocity.X > maxSpeed)
@@ -113,25 +119,64 @@ namespace GenMapViewer
             //  Brush interaction
             foreach (SquareBrush sq in square.Where(t => t != null))
             {
-                if (colRight = sq.Hitbox.Collision(position.X + plrWidth, position.Y))
+                if (colRight = sq.Hitbox.Contains(position.X + plrWidth, position.Y))
                 {
                     position.X = sq.X - plrWidth;
                 }
-                if (colDown = sq.Hitbox.Collision(position.X + plrWidth / 2, position.Y + plrHeight))
+                if (colDown = sq.Hitbox.Contains(position.X + plrWidth / 2, position.Y + plrHeight))
                 {
                     position.Y = sq.Y - plrHeight;
                 }
-                if (colUp = sq.Hitbox.Collision(position.X + plrWidth / 2, position.Y))
+                if (colUp = sq.Hitbox.Contains(position.X + plrWidth / 2, position.Y))
                 {
                     position.Y = sq.Y + sq.Height;
                     break;
                 }
-                if (colLeft = sq.Hitbox.Collision(position.X, position.Y))
+                if (colLeft = sq.Hitbox.Contains(position.X, position.Y))
                 {
                     position.X = sq.X + sq.Width;
                     break;
                 }
             }
+            AuxMovement();
+        }
+        private int fuel = 3;
+        private int maxFuel = 3;
+        private void AuxMovement()
+        {
+            clamp = fuel <= 0;
+            Vector2 mouse = Instance.MousePosition();
+            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            {
+                if (fuel > 0 && fuel-- <= 3)
+                {
+                    foreach (Dust dust in Main.dust.Where(t => t != null && t.active))
+                    {
+                        if (dust.type == Dust.Waypoint.Green)
+                        {
+                            if (dust.hitbox.Contains((int)mouse.X, (int)mouse.Y))
+                            {
+                                var speed = AngleToSpeed(AngleTo(position, mouse), 3f);
+                                velocity.X += speed.X;
+                                velocity.Y += speed.Y;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (fuel < maxFuel)
+                fuel++;
+        }
+        public static Vector2 AngleToSpeed(float angle, float amount)
+        {
+            float cos = (float)(amount * Math.Cos(angle));
+            float sine = (float)(amount * Math.Sin(angle));
+            return new Vector2(cos, sine);
+        }
+        public static float AngleTo(Vector2 from, Vector2 to)
+        {
+            return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
         }
         private new bool KeyUp(Key key)
         {
@@ -141,6 +186,7 @@ namespace GenMapViewer
         {
             return Keyboard.IsKeyDown(key);
         }
+        
         public bool IsMoving()
         {
             return KeyDown(Key.W) || KeyDown(Key.A) || KeyDown(Key.S) || KeyDown(Key.D) || velocity.X > 0f || velocity.X < 0f || velocity.Y > 0f || velocity.Y < 0f;
