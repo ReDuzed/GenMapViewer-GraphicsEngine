@@ -13,5 +13,11 @@ namespace GenMapViewer
     /// </summary>
     public partial class App : Application
     {
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            MessageBox.Show(e.Exception.Message + "\n\n" + e.Exception.StackTrace);
+            e.Handled = true;
+        }
     }
 }

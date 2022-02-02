@@ -6,11 +6,11 @@
         xmlns:local="clr-namespace:GenMapViewer"
         xmlns:ComponentModel="clr-namespace:System.ComponentModel;assembly=System" x:Name="Matrix" x:Class="GenMapViewer.Main"
         mc:Ignorable="d"
-        Title="Main Window" Height="450" ResizeMode="CanMinimize" Width="800" SizeToContent="WidthAndHeight">
-    <Grid>
-        <Rectangle x:Name="port" HorizontalAlignment="Left" Height="450" VerticalAlignment="Top" Width="800"/>
-
-        <Image x:Name="graphic" HorizontalAlignment="Left" Height="450" VerticalAlignment="Top" Width="800" Stretch="None" RenderTransformOrigin="0,0" >
+        Title="Main Window" Height="600" ResizeMode="CanMinimize" Width="800" SizeToContent="WidthAndHeight" Closing="Matrix_Closing" Background="White" Keyboard.KeyDown="Main_KeyDown" WindowStartupLocation="CenterScreen">
+    <Grid x:Name="grid_main">
+        <Rectangle x:Name="port" HorizontalAlignment="Left" Height="571" VerticalAlignment="Top" Width="800" Margin="0,0,0,0"/>
+        <Canvas x:Name="canvas"/>
+        <Image x:Name="graphic" HorizontalAlignment="Left" Height="571" VerticalAlignment="Top" Width="800" Stretch="None" RenderTransformOrigin="0,0" OpacityMask="Black" Margin="0,0,-6,0" >
             <Image.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -20,13 +20,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <Button Content="Run" HorizontalAlignment="Left" Margin="10,378,0,0" VerticalAlignment="Top" Width="120" Click="Button_Click" FontSize="22" Background="#FFBFBFBF" BorderBrush="{x:Null}" />
-        <WindowsFormsHost HorizontalAlignment="Left" Height="100" Margin="805,-24,-111,0" VerticalAlignment="Top" Width="100">
-            <WindowsFormsHost.DataContext>
-                <ComponentModel:BackgroundWorker x:Name="bgWorker"/>
-            </WindowsFormsHost.DataContext>
-        </WindowsFormsHost>
+        <Button Content="Run" HorizontalAlignment="Left" Margin="10,378,0,0" VerticalAlignment="Top" Width="120" Click="Button_Click" FontSize="22" Background="#FFBFBFBF" BorderBrush="{x:Null}" Visibility="Hidden" />
         <Image x:Name="logo" HorizontalAlignment="Left" Height="104" Margin="10,10,0,0" VerticalAlignment="Top" Width="304"/>
-
     </Grid>
 </Window>

@@ -35,12 +35,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Native, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\tServerApi-Plugins\dependencies\Native.dll</HintPath>
+    <Reference Include="Native">
+      <HintPath>.\Native.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\tServerApi-Plugins\dependencies\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\netstandard.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -66,13 +66,20 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="rand.cs" />
+    <Compile Include="Legacy\Dialog.cs" />
+    <Compile Include="Objects\Dust.cs" />
     <Compile Include="Entity.cs" />
-    <Compile Include="Legacy\Functions.cs" />
-    <Compile Include="Legacy\Random.cs" />
-    <Compile Include="NPCs\Necrosis.cs" />
-    <Compile Include="TEMP\Unified.Random.cs" />
+    <Compile Include="Objects\Foreground.cs" />
+    <Compile Include="Legacy\GUI.cs" />
+    <Compile Include="Legacy\Inventory.cs" />
+    <Compile Include="Objects\Item.cs" />
+    <Compile Include="Legacy\Menu.cs" />
+    <Compile Include="NPC.cs" />
+    <Compile Include="Objects\Particle.cs" />
+    <Compile Include="Background.cs" />
+    <Compile Include="Objects\Projectile.cs" />
     <Compile Include="World.cs" />
-    <Compile Include="LevelGen.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Global.cs" />
     <Page Include="Main.xaml">
@@ -117,5 +124,19 @@
   <ItemGroup>
     <Resource Include="Textures\Necrosis.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Textures\Alpha Tiles Scratches.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Textures\MagicPixel.png" />
+    <Resource Include="Textures\Orb.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Textures\temp_bg.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Textures\temp.png" />
+  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

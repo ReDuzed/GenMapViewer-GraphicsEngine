@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Windows.Input;
 
 using RUDD;
@@ -12,39 +15,89 @@ namespace GenMapViewer
 {
     public class Player : Entity
     {
-        
-        private bool canJump;
+        #region variables
         private bool clamp;
         public const int plrWidth = 32, plrHeight = 48;
-        
-        private bool colUp, colDown, colRight, colLeft;
-        protected override void PreDraw(Bitmap bmp, Graphics gfx)
+        const int buffer = 4;
+        public bool colUp, colDown, colRight, colLeft, collide;
+        public bool controlLeft, controlUp, controlRight, controlDown;
+        public bool isAttacking;
+        //  Initial values
+        bool canLeft = true, canRight = true;
+        float moveSpeed = 0.15f;
+        float maxSpeed = 3f;
+        float stopSpeed;
+        public int health = 100, mana = 20;
+        public const int MaxHealth = 100;
+        int flag, flag2;
+        #endregion
+        internal void Initialize()
         {
-            gfx.DrawRectangle(Pens.Blue, new System.Drawing.Rectangle(hitbox.x, hitbox.y, hitbox.Width, hitbox.Height));
-           
-            gfx.DrawString(velocity.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 100);
-            gfx.DrawString(position.Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 112);
-            gfx.DrawString(position.X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
-            //gfx.DrawString(square[0].Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 124);
-            gfx.DrawString(canJump.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 136);
-            gfx.DrawString(Main.frameRate.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 148);
-            gfx.DrawString(Instance.MousePosition().X.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 160);
-            gfx.DrawString(Instance.MousePosition().Y.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 172);
-            gfx.DrawString(fuel.ToString(), SystemFonts.DefaultFont, Brushes.Red, 10, 184);
-
+            active = true;
         }
-        protected override void Update()
+
+        internal void PreDraw(Bitmap bmp, Graphics gfx)
+        {
+        }
+        internal void Update()
         {
             hitbox = new Rectangle((int)position.X, (int)position.Y, plrWidth, plrHeight);
 
             //  Initializing
-            bool canLeft = true, canRight = true;
-            float moveSpeed = 0.15f;
-            float maxSpeed = 3f;
-            float boosted = 4f;
-            float stopSpeed = moveSpeed * 2f;
-            float jumpSpeed = maxSpeed * 2f * (!clamp ? boosted : 1f), fallSpeed = 0.917f;
+            stopSpeed = moveSpeed * 2f;
             
+            //  Collision
+            if (colLeft)
+            {
+                if (controlRight)
+                    position.X += moveSpeed * 2;
+                if (controlUp)
+                    velocity.Y -= moveSpeed;
+                else if (controlDown)
+                    velocity.Y += moveSpeed;
+            }
+            if (colRight)
+            {
+                if (controlLeft)
+                    position.X -= moveSpeed * 2;
+                if (controlUp)
+                    velocity.Y -= moveSpeed;
+                else if (controlDown)
+                    velocity.Y += moveSpeed;
+            }
+            if (colDown)
+            {
+                if (controlUp)
+                    position.Y -= moveSpeed * 2;
+                if (controlLeft)
+                    velocity.X -= moveSpeed;
+                else if (controlRight)
+                    velocity.X += moveSpeed;
+            }
+            if (colUp)
+            {
+                if (controlDown)
+                    position.Y += moveSpeed * 2;
+                if (controlLeft)
+                    velocity.X -= moveSpeed;
+                else if (controlRight)
+                    velocity.X += moveSpeed;
+            }
+
+            //  Movement mechanic
+            if (!IsMoving())
+            {
+                //  Stopping movement
+                if (velocity.X > 0f && !controlRight)
+                    velocity.X -= stopSpeed;
+                if (velocity.X < 0f && !controlLeft)
+                    velocity.X += stopSpeed;
+                if (velocity.Y > 0f && !controlDown)
+                    velocity.Y -= stopSpeed;
+                if (velocity.Y < 0f && !controlUp)
+                    velocity.Y += stopSpeed;
+            }
+
             //  Clamp
             if (velocity.X > maxSpeed)
                 velocity.X = maxSpeed;
@@ -58,57 +111,6 @@ namespace GenMapViewer
             //  Border
             canLeft = position.X >= 1;
             canRight = position.X < width - 1;
-            
-            //  Positioning
-            position.X += velocity.X;
-            position.Y += velocity.Y;
-            
-            //  Controls
-            if (!KeyDown(Key.A) && KeyDown(Key.D))
-            {
-                // move right
-                velocity.X += moveSpeed;
-            }
-            else if (KeyDown(Key.A) && !KeyDown(Key.D))
-            {
-                // move left
-                velocity.X -= moveSpeed;
-            }
-            else if (velocity.X > 0f)
-            {
-                velocity.X -= stopSpeed;
-            }
-            else if (velocity.X < 0f)
-            {
-                velocity.X += stopSpeed;
-            }
-            if (!KeyDown(Key.W) && KeyDown(Key.S))
-            {
-                // move down
-                if (!colDown)
-                    velocity.Y += moveSpeed;
-            }
-            else if (KeyDown(Key.W) && !KeyDown(Key.S))
-            {
-                // move up
-                velocity.Y -= moveSpeed;
-            }
-            else if (velocity.Y > 0f)
-            {
-                velocity.Y -= stopSpeed;
-            }
-            else if (velocity.Y < 0f)
-            {
-                velocity.Y += stopSpeed;
-            }
-
-            //  Collision
-            if (colLeft && velocity.X < 0f)
-                velocity.X = 0f;
-            if (colRight && velocity.X > 0f)
-                velocity.X = 0f;
-            if (colUp)
-                velocity.Y = 0f;
 
             //  Movement speed set
             if (velocity.X < moveSpeed && velocity.X > -moveSpeed)
@@ -116,51 +118,119 @@ namespace GenMapViewer
             if (velocity.Y < moveSpeed && velocity.Y > -moveSpeed)
                 velocity.Y = 0f;
 
-            //  Brush interaction
-            foreach (SquareBrush sq in square.Where(t => t != null))
+            //  Positioning
+            if (IsMoving())
             {
-                if (colRight = sq.Hitbox.Contains(position.X + plrWidth, position.Y))
+                if (!colLeft && !colRight)
+                    position.X += velocity.X;
+                if (!colUp && !colDown)
+                    position.Y += velocity.Y;
+            }
+
+            //  Controls
+            if (controlRight = !KeyDown(Key.A) && KeyDown(Key.D))
+            {
+                // move right
+                velocity.X += moveSpeed;
+            }
+            if (controlLeft = KeyDown(Key.A) && !KeyDown(Key.D))
+            {
+                // move left
+                velocity.X -= moveSpeed;
+            }
+            if (controlDown = !KeyDown(Key.W) && KeyDown(Key.S))
+            {
+                // move down
+                velocity.Y += moveSpeed;
+            }
+            if (controlUp = KeyDown(Key.W) && !KeyDown(Key.S))
+            {
+                // move up
+                velocity.Y -= moveSpeed;
+            }
+
+            //  GUI Hotbar
+            if (KeyDown(Key.D1) || KeyDown(Key.D2) || KeyDown(Key.D3) || KeyDown(Key.D4) || KeyDown(Key.D5))
+            {
+                foreach (GUI g in Main.gui.Where(t => t != null))
+                    g.selected = false;
+            }
+            if (KeyDown(Key.D1))
+                Main.gui[0].selected = true;
+            else if (KeyDown(Key.D2))
+                Main.gui[1].selected = true;
+            else if (KeyDown(Key.D3))
+                Main.gui[2].selected = true;
+            else if (KeyDown(Key.D4))
+                Main.gui[3].selected = true;
+            else if (KeyDown(Key.D5))
+                Main.gui[4].selected = true;
+            
+            //  Menu
+            //OpenMenu();
+        }
+
+        public void OpenMenu()
+        {
+            if (Main.MouseDevice.LeftButton == MouseButtonState.Pressed && flag2 % 2 == 0)
+            {
+                flag2++;
+                if (Main.gui[GUI.SkillMenu].hitbox.Contains(Main.MousePosition.X, Main.MousePosition.Y))
                 {
-                    position.X = sq.X - plrWidth;
-                }
-                if (colDown = sq.Hitbox.Contains(position.X + plrWidth / 2, position.Y + plrHeight))
-                {
-                    position.Y = sq.Y - plrHeight;
-                }
-                if (colUp = sq.Hitbox.Contains(position.X + plrWidth / 2, position.Y))
-                {
-                    position.Y = sq.Y + sq.Height;
-                    break;
-                }
-                if (colLeft = sq.Hitbox.Contains(position.X, position.Y))
-                {
-                    position.X = sq.X + sq.Width;
-                    break;
+                    foreach (GUI menu in Main.skill)
+                    {
+                        menu.active = !menu.active;
+                    }
                 }
             }
-            AuxMovement();
+            if (Main.MouseDevice.LeftButton == MouseButtonState.Released && flag2 % 2 == 1)
+                flag2 = 0;
+            //  GUI
+            if (isAttacking)
+                return;
+            if (flag % 2 == 0)
+            {
+                foreach (GUI gui in Main.gui.Where(t => t != null))
+                {
+                    if (gui.hitbox.Contains(Main.MousePosition.X, Main.MousePosition.Y))
+                    {
+                        return;
+                    }
+                }
+                if (LeftMouse())
+                { 
+                    if (GUI.GetElement(GUI.ID.SwordSwing).selected)
+                    {
+                        Projectile.NewProjectile(0, 0, Projectile.SwordSwing, Color.White, 10);
+                    }
+                    if (GUI.GetElement(GUI.ID.SwordSwipe).selected)
+                    {
+                        Projectile.NewProjectile(0, 0, Projectile.SwordSwipe, Color.White, 60);
+                    }
+                }
+                flag++;
+            }
+            if (Main.MouseDevice.LeftButton == MouseButtonState.Released && flag % 2 == 1)
+                flag = 0;
         }
         private int fuel = 3;
         private int maxFuel = 3;
         private void AuxMovement()
         {
-            clamp = fuel <= 0;
-            Vector2 mouse = Instance.MousePosition();
-            if (Mouse.LeftButton == MouseButtonState.Pressed)
+            //clamp = fuel <= 0;
+            Vector2 mouse = Main.WorldMouse;
+            if (Main.MouseDevice.LeftButton == MouseButtonState.Pressed)
             {
-                if (fuel > 0 && fuel-- <= 3)
+                foreach (Dust dust in Main.dust.Where(t => t != null && t.active))
                 {
-                    foreach (Dust dust in Main.dust.Where(t => t != null && t.active))
+                    if (dust.type == Dust.Waypoint.Green)
                     {
-                        if (dust.type == Dust.Waypoint.Green)
+                        if (dust.hitbox.Contains(mouse.X, mouse.Y))
                         {
-                            if (dust.hitbox.Contains((int)mouse.X, (int)mouse.Y))
-                            {
-                                var speed = AngleToSpeed(AngleTo(position, mouse), 3f);
-                                velocity.X += speed.X;
-                                velocity.Y += speed.Y;
-                                break;
-                            }
+                            var speed = AngleToSpeed(AngleTo(position, mouse), 5f);
+                            velocity.X += speed.X;
+                            velocity.Y += speed.Y;
+                            break;
                         }
                     }
                 }
@@ -168,28 +238,29 @@ namespace GenMapViewer
             else if (fuel < maxFuel)
                 fuel++;
         }
-        public static Vector2 AngleToSpeed(float angle, float amount)
-        {
-            float cos = (float)(amount * Math.Cos(angle));
-            float sine = (float)(amount * Math.Sin(angle));
-            return new Vector2(cos, sine);
-        }
-        public static float AngleTo(Vector2 from, Vector2 to)
-        {
-            return (float)Math.Atan2(to.Y - from.Y, to.X - from.X);
-        }
-        private new bool KeyUp(Key key)
+        public bool KeyUp(Key key)
         {
             return Keyboard.IsKeyUp(key);
         }
-        private new bool KeyDown(Key key)
+        public bool KeyDown(Key key)
         {
             return Keyboard.IsKeyDown(key);
         }
-        
         public bool IsMoving()
         {
-            return KeyDown(Key.W) || KeyDown(Key.A) || KeyDown(Key.S) || KeyDown(Key.D) || velocity.X > 0f || velocity.X < 0f || velocity.Y > 0f || velocity.Y < 0f;
+            return (KeyDown(Key.W) || KeyDown(Key.A) || KeyDown(Key.S) || KeyDown(Key.D)) && (velocity.X > 0f || velocity.X < 0f || velocity.Y > 0f || velocity.Y < 0f) && (!colDown || !colLeft || !colRight || !colUp);
+        }
+        public bool Movement()
+        {
+            return (KeyDown(Key.W) || KeyDown(Key.A) || KeyDown(Key.S) || KeyDown(Key.D));
+        }
+        public bool LeftMouse()
+        {
+            return Main.MouseDevice.LeftButton == MouseButtonState.Pressed;
+        }
+        public bool RightMouse()
+        {
+            return Main.MouseDevice.RightButton == MouseButtonState.Pressed;
         }
     }
 }
