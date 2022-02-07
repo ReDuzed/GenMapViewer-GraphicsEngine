@@ -35,6 +35,8 @@ namespace GenMapViewer
         public float scale = 1f;
         public float knockBack;
         public int damage;
+        public bool init = false;
+        public int frameCount = 0;
         public Vector2 Center
         {
             get { return new Vector2(position.X + width / 2, position.Y + height / 2); }

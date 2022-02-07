@@ -36,7 +36,7 @@ namespace GenMapViewer
             active = true;
         }
 
-        internal void PreDraw(Bitmap bmp, Graphics gfx)
+        internal void Draw(Bitmap bmp, Graphics gfx)
         {
         }
         internal void Update()
@@ -170,74 +170,6 @@ namespace GenMapViewer
             //OpenMenu();
         }
 
-        public void OpenMenu()
-        {
-            if (Main.MouseDevice.LeftButton == MouseButtonState.Pressed && flag2 % 2 == 0)
-            {
-                flag2++;
-                if (Main.gui[GUI.SkillMenu].hitbox.Contains(Main.MousePosition.X, Main.MousePosition.Y))
-                {
-                    foreach (GUI menu in Main.skill)
-                    {
-                        menu.active = !menu.active;
-                    }
-                }
-            }
-            if (Main.MouseDevice.LeftButton == MouseButtonState.Released && flag2 % 2 == 1)
-                flag2 = 0;
-            //  GUI
-            if (isAttacking)
-                return;
-            if (flag % 2 == 0)
-            {
-                foreach (GUI gui in Main.gui.Where(t => t != null))
-                {
-                    if (gui.hitbox.Contains(Main.MousePosition.X, Main.MousePosition.Y))
-                    {
-                        return;
-                    }
-                }
-                if (LeftMouse())
-                { 
-                    if (GUI.GetElement(GUI.ID.SwordSwing).selected)
-                    {
-                        Projectile.NewProjectile(0, 0, Projectile.SwordSwing, Color.White, 10);
-                    }
-                    if (GUI.GetElement(GUI.ID.SwordSwipe).selected)
-                    {
-                        Projectile.NewProjectile(0, 0, Projectile.SwordSwipe, Color.White, 60);
-                    }
-                }
-                flag++;
-            }
-            if (Main.MouseDevice.LeftButton == MouseButtonState.Released && flag % 2 == 1)
-                flag = 0;
-        }
-        private int fuel = 3;
-        private int maxFuel = 3;
-        private void AuxMovement()
-        {
-            //clamp = fuel <= 0;
-            Vector2 mouse = Main.WorldMouse;
-            if (Main.MouseDevice.LeftButton == MouseButtonState.Pressed)
-            {
-                foreach (Dust dust in Main.dust.Where(t => t != null && t.active))
-                {
-                    if (dust.type == Dust.Waypoint.Green)
-                    {
-                        if (dust.hitbox.Contains(mouse.X, mouse.Y))
-                        {
-                            var speed = AngleToSpeed(AngleTo(position, mouse), 5f);
-                            velocity.X += speed.X;
-                            velocity.Y += speed.Y;
-                            break;
-                        }
-                    }
-                }
-            }
-            else if (fuel < maxFuel)
-                fuel++;
-        }
         public bool KeyUp(Key key)
         {
             return Keyboard.IsKeyUp(key);

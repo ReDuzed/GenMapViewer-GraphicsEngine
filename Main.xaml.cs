@@ -17,7 +17,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using RUDD;
-using GenMapViewer.Biome;
 using System.Security.Policy;
 using System.Windows.Threading;
 
@@ -34,12 +33,6 @@ namespace GenMapViewer
             InitializeComponent();
             Initialize();
             LogoDisplay();
-        }
-        private void Initialize()
-        {
-            ScreenWidth = (int)graphic.Width;
-            ScreenHeight = (int)graphic.Height;
-            rand = new rand();
         }
         #region variables
         public static Main Instance;
@@ -163,12 +156,24 @@ namespace GenMapViewer
                 Button_Click(this, null);
             }
         }
+        private Dictionary<Order, Action> drawOrder = new Dictionary<Order, Action>();
+        enum Order : byte
+        {
+            Player,
+            Foreground,
+            Item,
+            Projectile,
+            NPC,
+            Dust,
+            Brush,
+            Background,
+            Misc
+        }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
             Logo = false;
             logo.IsEnabled = false;
             logo.Visibility = Visibility.Hidden;
-            bool open = false;
             EventHandler method = null;
             method = (object o, EventArgs args) => 
             {
@@ -190,7 +195,7 @@ namespace GenMapViewer
                             const byte buffer = 8;
                             for (int i = 0; i < 5; i++)
                             {
-                                gui[i] = GUI.NewElement((i + 1) * 42 + buffer, 20, 36, 36, "Element " + i, i == 0 ? GUI.Texture("Necrosis") : GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, i, i == 0 ? new Action(() => { NPC.NewNPC(0, 0, -1, System.Drawing.Color.White, 500); }) : null);
+                                gui[i] = GUI.NewElement((i + 1) * 42 + buffer, 20, 36, 36, "Element " + i, i == 0 ? GUI.Texture("Necrosis") : GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, i, i == 0 ? new Action(() => { }) : null);
                             }
                             gui[5] = GUI.NewElement(buffer, 20, 36, 36, "Menu", GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, GUI.SkillMenu, null);
                             for (int i = skill.GetLength(0) - 1; i >= 0; i--)
@@ -201,7 +206,6 @@ namespace GenMapViewer
                                     num--;
                                 }
                             }
-                            LocalPlayer.inventory = new Inventory(LocalPlayer);
                             MouseDevice.Capture(grid_main);
                             once = false;
                         }
@@ -221,6 +225,12 @@ namespace GenMapViewer
         }
         #endregion
         #region update and draw
+        private void Initialize()
+        {
+            ScreenWidth = (int)graphic.Width;
+            ScreenHeight = (int)graphic.Height;
+            rand = new rand();
+        }
         private void Draw(Bitmap bmp, Graphics graphic, bool CAMERA_Follow = false)
         {
             if (CAMERA_Follow)
@@ -241,19 +251,19 @@ namespace GenMapViewer
             graphic.Clear(types[TileID.Empty]);
             graphic.FillRectangle(new SolidBrush(types[TileID.Empty]), 0, 0, ScreenWidth, ScreenHeight);
             foreach (Background g in ground.Where(t => t != null))
-                g.PreDraw(bmp, graphic);
+                g.Draw(bmp, graphic);
             foreach (SquareBrush sq in square.Where(t => t != null))
-                sq.PreDraw(bmp, graphic);
-            foreach (NPC n in npc.Where(t => t != null))
-                n.PreDraw(bmp, graphic);
+                sq.Draw(bmp, graphic);
+            foreach (NPC n in npc.Where(t => t != null && t.init))
+                n.Draw(bmp, graphic, n.frameCount);
             foreach (Player p in player.Where(t => t != null))
-                p.PreDraw(bmp, graphic);
-            foreach (Projectile pr in projectile.Where(t => t != null))
-                pr.PreDraw(bmp, graphic, pr.animated);
-            foreach (Dust d in dust.Where(t => t != null))
-                d.Draw(bmp, graphic);
-            foreach (Item i in item.Where(t => t != null))
-                i.Draw(bmp, graphic);
+                p.Draw(bmp, graphic);
+            foreach (Projectile pr in projectile.Where(t => t != null && t.init))
+                pr.Draw(bmp, graphic, pr.frameCount);
+            foreach (Dust d in dust.Where(t => t != null && t.init))
+                d.Draw(bmp, graphic, d.frameCount);
+            foreach (Item i in item.Where(t => t != null && t.init))
+                i.Draw(bmp, graphic, i.frameCount);
             foreach (GUI g in gui.Where(t => t != null))
                 g.Draw(bmp, graphic);
         }
@@ -272,21 +282,45 @@ namespace GenMapViewer
                 p.colLeft = false;
             }
             foreach (Item i in item.Where(t => t != null))
+            {
+                if (!i.init)
+                {
+                    i.Initialize();
+                    i.init = true;
+                }
                 i.Update();
+            }
             foreach (SquareBrush sq in square.Where(t => t != null))
                 sq.Collision(LocalPlayer);
             foreach (NPC n in npc.Where(t => t != null))
             {
+                if (!n.init)
+                {
+                    n.Initialize();
+                    n.init = true;
+                }
                 n.Update();
                 n.AI();
             }
             foreach (Projectile pr in projectile.Where(t => t != null))
             {
+                if (!pr.init)
+                {
+                    pr.Initialize();
+                    pr.init = true;
+                }
                 pr.Update();
                 pr.AI();
             }
             foreach (Dust d in dust.Where(t => t != null))
+            {
+                if (!d.init)
+                {
+                    d.Initialize();
+                    d.init = true;
+                }
                 d.Update();
+            }
             foreach (GUI g in gui.Where(t => t != null))
                 g.Update();
         }

@@ -22,7 +22,7 @@ namespace GenMapViewer
             this.texture = texture;
             active = true;
         }
-        internal void PreDraw(Bitmap bmp, Graphics gfx)
+        internal void Draw(Bitmap bmp, Graphics gfx)
         {
             if (!active)
                 return;
