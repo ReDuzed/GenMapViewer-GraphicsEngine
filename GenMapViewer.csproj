@@ -67,22 +67,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Legacy\rand.cs" />
-    <Compile Include="Legacy\Dialog.cs" />
-    <Compile Include="Objects\Dust.cs" />
-    <Compile Include="Entity.cs" />
-    <Compile Include="Objects\Foreground.cs" />
-    <Compile Include="Legacy\GUI.cs" />
-    <Compile Include="Legacy\Inventory.cs" />
-    <Compile Include="Objects\Item.cs" />
-    <Compile Include="Legacy\Menu.cs" />
-    <Compile Include="NPC.cs" />
-    <Compile Include="Objects\Particle.cs" />
-    <Compile Include="Background.cs" />
-    <Compile Include="Objects\Projectile.cs" />
-    <Compile Include="World.cs" />
-    <Compile Include="Player.cs" />
-    <Compile Include="Global.cs" />
     <Page Include="Main.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -121,22 +105,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Textures\Necrosis.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Textures\Alpha Tiles Scratches.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Textures\MagicPixel.png" />
-    <Resource Include="Textures\Orb.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Textures\temp_bg.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Textures\temp.png" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
