@@ -25,13 +25,13 @@ namespace GenMapViewer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class Main : Window
+    public abstract partial class Main : Window
     {
         public Main()
         {
             Instance = this;
             InitializeComponent();
-            Initialize();
+            LoadResources();
             MainMenu();
         }
         #region variables
@@ -40,8 +40,11 @@ namespace GenMapViewer
         private static Thread mainMenu;
         public static int ScreenWidth => 800;
         public static int ScreenHeight => 600;
+        public float ScreenX, ScreenY;
+        private bool init = false;
         Action method2;
         private int frameRate => 1000 / 60;
+        public static float FrameRate = 1000 / 120;
         #endregion
         #region base functions
         private void MainMenu()
@@ -53,14 +56,14 @@ namespace GenMapViewer
                 Main m = (Main)t;
                 method2 = delegate ()
                 {
-                    if (!Main.Logo)
+                    if (!Logo)
                         return;
                     System.Threading.Thread.Sleep(frameRate);
                     using (Bitmap bmp = new Bitmap((int)m.logo.Width, (int)m.logo.Height))
                     {
                         using (Graphics graphic = Graphics.FromImage(bmp))
                         {
-                            graphic.DrawString("Demo", System.Drawing.SystemFonts.DefaultFont, System.Drawing.Brushes.Red, 10, 30);
+                            TitleScreen(bmp, graphic);
                         }
                         int stride = (int)m.logo.Width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
                         var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, (int)m.logo.Width, (int)m.logo.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -91,161 +94,94 @@ namespace GenMapViewer
             Logo = false;
             logo.IsEnabled = false;
             logo.Visibility = Visibility.Hidden;
-            EventHandler method = null;
-            method = (object o, EventArgs args) => 
+            EventHandler draw = null;
+            draw = (object o, EventArgs args) => 
             {
                 using (Bitmap bmp = new Bitmap(ScreenWidth, ScreenHeight))
                 {
                     using (Graphics graphic = Graphics.FromImage(bmp))
-                    {
-                        OldMouse = MouseDevice;
-                        if (once)
-                        {
-                            player[0] = new Player();
-                            player[0].Initialize();
-                            player[0].position = new Vector2(ScreenWidth / 2 - Player.plrWidth / 2, ScreenHeight / 2 - Player.plrHeight / 2);
-                            square[0] = new SquareBrush(100, -100, ScreenWidth - 100, 100);
-                            square[1] = new SquareBrush(-100, 0, 100, ScreenHeight);
-                            square[2] = new SquareBrush(ScreenWidth, 0, 100, ScreenHeight);
-                            square[3] = new SquareBrush(0, ScreenHeight, ScreenWidth - 200, 100);
-                            ground[0] = new Background(0, 0, ScreenWidth, ScreenHeight, GUI.Texture("Alpha Tiles Scratches"));
-                            int num = skill.Length + 6;
-                            const byte buffer = 8;
-                            for (int i = 0; i < 5; i++)
-                            {
-                                gui[i] = GUI.NewElement((i + 1) * 42 + buffer, 20, 36, 36, "Element " + i, i == 0 ? GUI.Texture("Necrosis") : GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, i, i == 0 ? new Action(() => { }) : null);
-                            }
-                            gui[5] = GUI.NewElement(buffer, 20, 36, 36, "Menu", GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, GUI.SkillMenu, null);
-                            for (int i = skill.GetLength(0) - 1; i >= 0; i--)
-                            {
-                                for (int j = skill.GetLength(1) - 1; j >= 0; j--)
-                                {
-                                    skill[i, j] = GUI.NewMenu((i + 1) * 42, (j + 2) * 42, 36, 36, string.Concat("Element ", i, "/", j), GUI.Texture("MagicPixel"), LocalPlayer.whoAmI, num, num, null);
-                                    num--;
-                                }
-                            }
-                            MouseDevice.Capture(grid_main);
-                            once = false;
-                        }
-                        else
-                        {
-                            Draw(bmp, graphic);
-                        }
-                    }
+                        Draw(bmp, graphic);
                     int stride = ScreenWidth * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
                     var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, ScreenWidth, ScreenHeight), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
                     graphic.Source = BitmapSource.Create(ScreenWidth, ScreenHeight, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * ScreenHeight, stride);
                     bmp.UnlockBits(data);
                 }
-                Update();
-                //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
             };
-            //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
-            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 120), DispatcherPriority.ApplicationIdle, method, Dispatcher);
-        }
-        #endregion
-        #region update and draw
-        private void Initialize()
-        {
-        }
-        private void PreDraw(Bitmap bmp, Graphics gfx)
-        {
-        }
-        private void Draw(Bitmap bmp, Graphics graphic, bool CAMERA_Follow = false, Vector2 CAMERA = Vector2.Zero)
-        {
-            if (CAMERA_Follow)
+            EventHandler logic = null;
+            logic = (object o, EventArgs args) => 
             { 
-                if (LocalPlayer.IsMoving())
+                if (init)
                 {
-                    if (!LocalPlayer.colLeft && !LocalPlayer.colRight)
-                        ScreenX -= player[0].velocity.X;
-                    if (!LocalPlayer.colUp && !LocalPlayer.colDown)
-                        ScreenY -= player[0].velocity.Y;
+                    Initialize();
+                    init = false;
                 }
-                graphic.RenderingOrigin = new System.Drawing.Point((int)LocalPlayer.position.X, (int)LocalPlayer.position.Y);
-                graphic.TranslateTransform(
-                    ScreenX + player[0].velocity.X,
-                    ScreenY + player[0].velocity.Y,
-                    System.Drawing.Drawing2D.MatrixOrder.Append);
-            }
-            graphic.Clear(System.Drawing.Color.Black);
-            graphic.FillRectangle(System.Drawing.Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
-            foreach (Background g in ground.Where(t => t != null))
-                g.Draw(bmp, graphic);
-            foreach (NPC n in npc.Where(t => t != null && t.init))
-                n.Draw(bmp, graphic, n.frameCount);
-            foreach (Player p in player.Where(t => t != null))
-                p.Draw(bmp, graphic);
-            foreach (Projectile pr in projectile.Where(t => t != null && t.init))
-                pr.Draw(bmp, graphic, pr.frameCount);
-            foreach (Dust d in dust.Where(t => t != null && t.init))
-                d.Draw(bmp, graphic, d.frameCount);
-            foreach (Item i in item.Where(t => t != null && t.init))
-                i.Draw(bmp, graphic, i.frameCount);
-            //foreach (GUI g in gui.Where(t => t != null))
-            //    g.Draw(bmp, graphic);
-        }
-        private void Update()
-        {
-            if (KeyDown(Key.Escape))
-            {
-                Application.Current.Shutdown();
-            }
-            var m = MouseDevice.GetPosition(grid_main);
-            MousePosition = new Vector2((float)m.X, (float)m.Y);
-            WorldMouse = new Vector2(MousePosition.X - ScreenX, MousePosition.Y - ScreenY);
-            foreach (Player p in player.Where(t => t != null))
-            {
-                p.Update();
-                p.collide = false;
-                p.colUp = false;
-                p.colDown = false;
-                p.colRight = false;
-                p.colLeft = false;
-            }
-            foreach (Item i in item.Where(t => t != null))
-            {
-                if (!i.init)
-                {
-                    i.Initialize();
-                    i.init = true;
-                }
-                i.Update();
-            }
-            foreach (SquareBrush sq in square.Where(t => t != null))
-                sq.Collision(LocalPlayer);
-            foreach (NPC n in npc.Where(t => t != null))
-            {
-                if (!n.init)
-                {
-                    n.Initialize();
-                    n.init = true;
-                }
-                n.Update();
-                n.AI();
-            }
-            foreach (Projectile pr in projectile.Where(t => t != null))
-            {
-                if (!pr.init)
-                {
-                    pr.Initialize();
-                    pr.init = true;
-                }
-                pr.Update();
-                pr.AI();
-            }
-            foreach (Dust d in dust.Where(t => t != null))
-            {
-                if (!d.init)
-                {
-                    d.Initialize();
-                    d.init = true;
-                }
-                d.Update();
-            }
-            foreach (GUI g in gui.Where(t => t != null))
-                g.Update();
+                Update();
+            };
+            new DispatcherTimer(TimeSpan.FromMilliseconds(FrameRate), DispatcherPriority.Render, draw, Dispatcher);
+            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 500), DispatcherPriority.Send, logic, Dispatcher);
         }
         #endregion
+        #region overrides
+        public abstract bool PreDraw(Bitmap bitmap, Graphics graphics, Camera CAMERA, bool CAMERA_FOLLOW = false);
+        public abstract void Draw(Bitmap bitmap, Graphics graphics);
+        public abstract void Camera(Graphics graphics, Camera CAMERA);
+        public abstract void Update();
+        public abstract void Initialize();
+        public abstract void LoadResources();
+        public abstract void TitleScreen(Bitmap bitmap, Graphics graphics);
+        #endregion
+    }
+    public class Core : Main
+    {
+        public override void LoadResources()
+        {
+        }
+        public override void Initialize()
+        {
+        }
+        public override void TitleScreen(Bitmap bitmap, Graphics graphics)
+        {
+            graphics.DrawString("Demo", System.Drawing.SystemFonts.DefaultFont, System.Drawing.Brushes.Red, 10, 30);
+        }
+        public override bool PreDraw(Bitmap bitmap, Graphics graphics, Camera CAMERA, bool CAMERA_FOLLOW = false)
+        {
+            if (CAMERA_FOLLOW)
+            { 
+                Camera(graphics, CAMERA);
+            }
+            return false;
+        }
+        public override void Draw(Bitmap bitmap, Graphics graphics)
+        {
+            if (!PreDraw(bitmap, graphics, null))
+                return;
+            graphics.Clear(System.Drawing.Color.Black);
+            graphics.FillRectangle(System.Drawing.Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
+        }
+        public override void Update()
+        {
+            if (Keyboard.IsKeyDown(Key.Escape))
+                Application.Current.Shutdown();
+        }
+        public override void Camera(Graphics graphic, Camera CAMERA)
+        {
+            if (CAMERA.isMoving)
+            {
+                ScreenX -= CAMERA.velocity.X;
+                ScreenY -= CAMERA.velocity.Y;
+            }
+            graphic.RenderingOrigin = new System.Drawing.Point((int)CAMERA.position.X, (int)CAMERA.position.Y);
+            graphic.TranslateTransform(
+                ScreenX + CAMERA.velocity.X,
+                ScreenY + CAMERA.velocity.Y,
+                System.Drawing.Drawing2D.MatrixOrder.Append);
+        }
+    }
+    public class Camera
+    {
+        public Vector2 oldPosition;
+        public Vector2 position;
+        public Vector2 velocity;
+        public bool isMoving;
     }
 }

@@ -13,6 +13,34 @@
         {
             get { return new Vector2(0f, 0f); }
         }
+        public static Vector2 operator +(Vector2 one, Vector2 two)
+        {
+            return new Vector2(one.X + two.X, one.Y + two.Y);
+        }
+        public static Vector2 operator -(Vector2 one, Vector2 two)
+        {
+            return new Vector2(one.X + two.X, one.Y + two.Y);
+        }
+        public static bool operator ==(Vector2 one, Vector2 two)
+        {
+            return one.X == two.X && one.Y == two.Y;
+        }
+        public static bool operator !=(Vector2 one, Vector2 two)
+        {
+            return one.X != two.X || one.Y != two.Y;
+        }
+        public override string ToString()
+        {
+            return string.Format("X:{0} Y:{1}", X, Y);
+        }
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
     public struct Region
     {
