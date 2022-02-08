@@ -18,6 +18,7 @@ namespace GenMapViewer
         public void Kill()
         {
             Main.dust[whoAmI].active = false;
+            Main.dust[whoAmI] = null;
         }
     }
 }

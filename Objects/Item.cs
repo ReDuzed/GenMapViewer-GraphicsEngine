@@ -23,6 +23,7 @@ namespace GenMapViewer
         public void Kill()
         {
             Main.item[whoAmI].active = false;
+            Main.item[whoAmI] = null;
         }
     }
 }

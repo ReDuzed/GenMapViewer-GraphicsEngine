@@ -46,6 +46,7 @@ namespace GenMapViewer
         public static GUI[,] skill = new GUI[10, 4];
         public static Item[] item = new Item[501];
         public static Player[] player = new Player[256];
+        public static Foreground[] fg = new Foreground[101];
         private bool once = true;
         public static int ScreenWidth;
         public static int ScreenHeight;
@@ -253,12 +254,14 @@ namespace GenMapViewer
             }
             graphic.Clear(System.Drawing.Color.Black);
             graphic.FillRectangle(System.Drawing.Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
+            foreach (Foreground f in fg.Where(t => t != null))
+                f.Draw(bmp, graphic);
+            foreach (Player p in player.Where(t => t != null))
+                p.Draw(bmp, graphic);
             foreach (Background g in ground.Where(t => t != null))
                 g.Draw(bmp, graphic);
             foreach (NPC n in npc.Where(t => t != null && t.init))
                 n.Draw(bmp, graphic, n.frameCount);
-            foreach (Player p in player.Where(t => t != null))
-                p.Draw(bmp, graphic);
             foreach (Projectile pr in projectile.Where(t => t != null && t.init))
                 pr.Draw(bmp, graphic, pr.frameCount);
             foreach (Dust d in dust.Where(t => t != null && t.init))
@@ -277,6 +280,7 @@ namespace GenMapViewer
             var m = MouseDevice.GetPosition(grid_main);
             MousePosition = new Vector2((float)m.X, (float)m.Y);
             WorldMouse = new Vector2(MousePosition.X - ScreenX, MousePosition.Y - ScreenY);
+            World.Spawn();
             foreach (Player p in player.Where(t => t != null))
             {
                 p.Update();
@@ -286,6 +290,8 @@ namespace GenMapViewer
                 p.colRight = false;
                 p.colLeft = false;
             }
+            foreach (Foreground f in fg.Where(t => t != null && t.init))
+                f.Update();
             foreach (Item i in item.Where(t => t != null))
             {
                 if (!i.init)

@@ -17,6 +17,7 @@ namespace GenMapViewer
         public void Kill()
         {
             Main.npc[whoAmI].active = false;
+            Main.npc[whoAmI] = null;
         }
     }
 }

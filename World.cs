@@ -10,10 +10,24 @@ using System.Threading.Tasks;
 
 namespace GenMapViewer
 {
+    public class World
+    {
+        static int ticks = 0;
+        public static void Spawn()
+        {
+            if (ticks < int.MaxValue)
+                ticks++;
+            else ticks = 0;
+
+            if (Main.fg.Where(t => t != null).Count() < 100 && ticks % 60 == 0 && Main.rand.NextBool())
+            {
+                var fg = new Foreground();
+                fg.Initialize();
+            }
+        }
+    }
     public class SquareBrush : Entity
     {
-        public int X;
-        public int Y;
         public int Width;
         public int Height;
         public bool Active = true;

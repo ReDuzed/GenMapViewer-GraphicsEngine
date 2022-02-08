@@ -16,6 +16,7 @@ namespace GenMapViewer
         public void Kill()
         {
             Main.projectile[whoAmI].active = false;
+            Main.projectile[whoAmI] = null;
         }
     }
     public class O : Projectile

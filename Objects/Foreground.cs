@@ -12,22 +12,61 @@ namespace GenMapViewer
 {
     public class Foreground : Entity
     {
-        public bool light;
-        public Foreground(int x, int y, int width, int height, Image texture)
+        public Foreground()
+        { 
+        }
+        private float moveSpeed;
+        private float moveMultiplier => 2.5f;
+        public void Initialize()
         {
-            this.width = width;
-            this.height = height;
-            position = new Vector2(x, y);
-            hitbox = new Rectangle(x, y, width, height);
-            this.texture = texture;
+            for (int i = 0; i < Main.fg.Length; i++)
+            {
+                if (Main.fg[i] == null || !Main.fg[i].active)
+                {
+                    whoAmI = i;
+                    break;
+                }
+            }
+            Main.fg[whoAmI] = this;
             active = true;
+            if (Main.rand.NextBool())
+            { 
+                width = 48;
+                height = 48;
+            }
+            else
+            {
+                width = 2;
+                height = 18;
+            }
+            color = Main.types[Main.rand.Next(1, 3)];
+            moveSpeed = Main.rand.NextFloat() * moveMultiplier;
+            position = new Vector2(Main.rand.Next(0, Main.ScreenWidth - width), -height);
+        }
+        public void Update()
+        {
+            if (!init)
+            {
+                Initialize();
+                init = true;
+            }
+            position.Y += moveSpeed;
+            hitbox = new Rectangle((int)position.X, (int)position.Y, width, height);
+            if (position.Y > Main.ScreenHeight)
+                Kill();
         }
         public void Draw(Bitmap bmp, Graphics gfx)
         {
             if (!active)
                 return;
-            if (!light)
-                gfx.DrawImage(texture, new RectangleF(position.X, position.Y, width, height), new RectangleF(position.X, position.Y, width, height), GraphicsUnit.Pixel);
+            var pen = new Pen(new SolidBrush(color));
+            pen.Width = 2;
+            gfx.DrawRectangle(pen, hitbox.GetSDRectangle());
+        }
+        public void Kill()
+        {
+            Main.fg[whoAmI].active = false;
+            Main.fg[whoAmI] = null;
         }
     }
 }

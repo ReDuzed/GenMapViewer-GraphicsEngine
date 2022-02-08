@@ -33,7 +33,7 @@ namespace GenMapViewer
         }
         public bool NextBool()
         {
-            return NextFloat() < 0.50f;
+            return Next(3) == 1;
         }
     }
 }

@@ -54,7 +54,7 @@ namespace GenMapViewer
     }
     public class TileID
     {
-        public static byte
+        public const byte
             Empty = 0,
             Ash = 1,
             Ore = 2,
