@@ -37,14 +37,16 @@ namespace GenMapViewer
         #region variables
         public static Main Instance;
         public static bool Logo = true;  
-        private static Thread mainMenu;
         public static int ScreenWidth => 800;
         public static int ScreenHeight => 600;
         public float ScreenX, ScreenY;
-        private bool init = false;
+        int frameRate => 1000 / 60;
+        Thread mainMenu;
+        bool init = false;
         Action method2;
-        private int frameRate => 1000 / 60;
-        public static float FrameRate = 1000 / 120;
+        
+        public const float defaultFrameRate = 1000 / 120;
+        public static float FrameRate = defaultFrameRate;
         #endregion
         #region base functions
         private void MainMenu()
@@ -182,6 +184,6 @@ namespace GenMapViewer
         public Vector2 oldPosition;
         public Vector2 position;
         public Vector2 velocity;
-        public bool isMoving;
+        public bool isMoving => velocity != Vector2.Zero;
     }
 }
