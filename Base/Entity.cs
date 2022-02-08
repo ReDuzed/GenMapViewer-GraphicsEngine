@@ -49,9 +49,13 @@ namespace GenMapViewer
             float b = end.Y - start.Y;
             return (float)(Math.Sqrt(Math.Pow(a, 2)) + Math.Sqrt(Math.Pow(b, 2)));
         }
+        public float AngleTo(Vector2 end)
+        {
+            return (float)Math.Atan2(position.Y - end.Y, position.X - end.X);
+        }
         public float AngleTo(Vector2 from, Vector2 to)
         {
-            return (float)Math.Atan2(from.Y -to.Y, from.X - to.X);
+            return (float)Math.Atan2(from.Y - to.Y, from.X - to.X);
         }
         public Vector2 AngleToSpeed(float angle, float amount)
         {

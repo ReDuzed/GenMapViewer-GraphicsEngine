@@ -79,7 +79,7 @@
     <Compile Include="Objects\Particle.cs" />
     <Compile Include="Base\Background.cs" />
     <Compile Include="Objects\Projectile.cs" />
-    <Compile Include="Legacy\SampleNPC.cs" />
+    <Compile Include="Npcs\SampleNPC.cs" />
     <Compile Include="World.cs" />
     <Compile Include="Base\Player.cs" />
     <Compile Include="Global.cs" />
@@ -138,8 +138,6 @@
   <ItemGroup>
     <Resource Include="Textures\temp.png" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Npcs\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
