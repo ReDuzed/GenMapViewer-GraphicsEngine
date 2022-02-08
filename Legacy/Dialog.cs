@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using RUDD;
+using CirclePrefect.Native;
 
 namespace GenMapViewer
 {
-    public class Dialog : SimpleEntity, IDisposable
+    public class Dialog : Entity, IDisposable
     {
         public static Dialog Instance;
         internal Item Selected
@@ -47,20 +47,20 @@ namespace GenMapViewer
 
         public void Update()
         {
-            foreach (Item i in Inventory.itemList)
-            {
-                if (active = (i.hitbox.Contains(Main.WorldMouse) && Menu.Select?.active == false))
-                {
-                    return;
-                }
-            }
-            foreach (Item i in Inventory.itemProximate)
-            {
-                if (active = (i.hitbox.Contains(Main.WorldMouse) && Menu.Select?.active == false))
-                {
-                    return;
-                }
-            }
+            //foreach (Item i in Inventory.itemList)
+            //{
+            //    if (active = (i.hitbox.Contains(Main.WorldMouse) && Menu.Select?.active == false))
+            //    {
+            //        return;
+            //    }
+            //}
+            //foreach (Item i in Inventory.itemProximate)
+            //{
+            //    if (active = (i.hitbox.Contains(Main.WorldMouse) && Menu.Select?.active == false))
+            //    {
+            //        return;
+            //    }
+            //}
         }
         public void Draw(Bitmap bmp, Graphics gfx)
         {

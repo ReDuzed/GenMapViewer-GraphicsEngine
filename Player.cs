@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Input;
 
-using RUDD;
+using CirclePrefect.Native;
 
 namespace GenMapViewer
 {
@@ -38,6 +38,7 @@ namespace GenMapViewer
 
         internal void Draw(Bitmap bmp, Graphics gfx)
         {
+            gfx.FillRectangle(Brushes.White, hitbox.GetRectangleF());
         }
         internal void Update()
         {
@@ -170,11 +171,11 @@ namespace GenMapViewer
             //OpenMenu();
         }
 
-        public bool KeyUp(Key key)
+        internal bool KeyUp(Key key)
         {
             return Keyboard.IsKeyUp(key);
         }
-        public bool KeyDown(Key key)
+        internal bool KeyDown(Key key)
         {
             return Keyboard.IsKeyDown(key);
         }

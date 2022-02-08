@@ -1,4 +1,4 @@
-﻿using RUDD;
+﻿using CirclePrefect.Native;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,16 +10,15 @@ using System.Threading.Tasks;
 
 namespace GenMapViewer
 {
-    public class SquareBrush : Main
+    public class SquareBrush : Entity
     {
         public int X;
         public int Y;
-        public new int Width;
-        public new int Height;
+        public int Width;
+        public int Height;
         public bool Active = true;
         public bool Square = true;
         private bool isDoor = false;
-        public int whoAmI;
         public Rectangle Hitbox
         {
             get { return new Rectangle(X, Y, Width, Height); }
@@ -27,10 +26,6 @@ namespace GenMapViewer
         public bool door(bool door)
         {
             return isDoor = door;
-        }
-        public bool active(bool active)
-        {
-            return Active = active;
         }
         public SquareBrush(int x, int y, int width, int height)
         {

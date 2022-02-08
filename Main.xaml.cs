@@ -16,7 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-using RUDD;
+using CirclePrefect.Native;
 using System.Security.Policy;
 using System.Windows.Threading;
 
@@ -187,9 +187,10 @@ namespace GenMapViewer
                             player[0] = new Player();
                             player[0].Initialize();
                             player[0].position = new Vector2(ScreenWidth / 2 - Player.plrWidth / 2, ScreenHeight / 2 - Player.plrHeight / 2);
-                            square[0] = new SquareBrush(0, 0, 100, ScreenHeight);
-                            square[1] = new SquareBrush(ScreenWidth - 100, 0, 100, ScreenHeight);
-                            square[2] = new SquareBrush(100, ScreenHeight - 100, ScreenWidth - 200, 100);
+                            square[0] = new SquareBrush(100, -100, ScreenWidth - 100, 100);
+                            square[1] = new SquareBrush(-100, 0, 100, ScreenHeight);
+                            square[2] = new SquareBrush(ScreenWidth, 0, 100, ScreenHeight);
+                            square[3] = new SquareBrush(0, ScreenHeight, ScreenWidth - 200, 100);
                             ground[0] = new Background(0, 0, ScreenWidth, ScreenHeight, GUI.Texture("Alpha Tiles Scratches"));
                             int num = skill.Length + 6;
                             const byte buffer = 8;
@@ -220,8 +221,10 @@ namespace GenMapViewer
                     bmp.UnlockBits(data);
                 }
                 Update();
+                //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
             };
-            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 120), DispatcherPriority.Normal, method, Dispatcher);
+            //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
+            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 120), DispatcherPriority.ApplicationIdle, method, Dispatcher);
         }
         #endregion
         #region update and draw
@@ -248,12 +251,10 @@ namespace GenMapViewer
                     ScreenY + player[0].velocity.Y,
                     System.Drawing.Drawing2D.MatrixOrder.Append);
             }
-            graphic.Clear(types[TileID.Empty]);
-            graphic.FillRectangle(new SolidBrush(types[TileID.Empty]), 0, 0, ScreenWidth, ScreenHeight);
+            graphic.Clear(System.Drawing.Color.Black);
+            graphic.FillRectangle(System.Drawing.Brushes.Black, 0, 0, ScreenWidth, ScreenHeight);
             foreach (Background g in ground.Where(t => t != null))
                 g.Draw(bmp, graphic);
-            foreach (SquareBrush sq in square.Where(t => t != null))
-                sq.Draw(bmp, graphic);
             foreach (NPC n in npc.Where(t => t != null && t.init))
                 n.Draw(bmp, graphic, n.frameCount);
             foreach (Player p in player.Where(t => t != null))
@@ -264,11 +265,15 @@ namespace GenMapViewer
                 d.Draw(bmp, graphic, d.frameCount);
             foreach (Item i in item.Where(t => t != null && t.init))
                 i.Draw(bmp, graphic, i.frameCount);
-            foreach (GUI g in gui.Where(t => t != null))
-                g.Draw(bmp, graphic);
+            //foreach (GUI g in gui.Where(t => t != null))
+            //    g.Draw(bmp, graphic);
         }
         private void Update()
         {
+            if (KeyDown(Key.Escape))
+            {
+                Application.Current.Shutdown();
+            }
             var m = MouseDevice.GetPosition(grid_main);
             MousePosition = new Vector2((float)m.X, (float)m.Y);
             WorldMouse = new Vector2(MousePosition.X - ScreenX, MousePosition.Y - ScreenY);

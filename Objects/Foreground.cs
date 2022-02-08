@@ -1,4 +1,4 @@
-﻿using RUDD;
+﻿using CirclePrefect.Native;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -22,7 +22,7 @@ namespace GenMapViewer
             this.texture = texture;
             active = true;
         }
-        protected override void PreDraw(Bitmap bmp, Graphics gfx)
+        public void Draw(Bitmap bmp, Graphics gfx)
         {
             if (!active)
                 return;

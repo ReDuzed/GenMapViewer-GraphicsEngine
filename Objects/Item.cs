@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Input;
-using RUDD;
+using CirclePrefect.Native;
 using System.Windows.Media.Effects;
 using System.Resources;
 using System.Windows.Forms;

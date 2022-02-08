@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using RUDD;
+using CirclePrefect.Native;
 
 namespace GenMapViewer
 {
@@ -22,8 +22,6 @@ namespace GenMapViewer
             set { position.Y = value; }
         }
         public int style;
-        public Item.Style itemStyle;
-        public Item.Type itemType;
         public bool active;
         public int type;
         public int maxLife;

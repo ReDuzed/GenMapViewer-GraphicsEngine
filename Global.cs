@@ -1,13 +1,10 @@
-﻿using RUDD;
+﻿using CirclePrefect.Native;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-using Terraria.Utilities;
-using GenMapViewer.NPCs;
 using System.Drawing.Text;
 
 namespace GenMapViewer
@@ -36,13 +33,6 @@ namespace GenMapViewer
         public float radians(float distance)
         {
             return radian * (45f / distance);
-        }
-    }
-    public class WorldGen
-    {
-        public static UnifiedRandom genRand
-        {
-            get { return Main.rand; }
         }
     }
     public struct Tile

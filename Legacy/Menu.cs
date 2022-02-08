@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-using RUDD;
+using CirclePrefect.Native;
 
 namespace GenMapViewer
 {
@@ -61,7 +61,7 @@ namespace GenMapViewer
                             Inventory.itemList.Remove(Current);
                             Inventory.itemProximate.Add(Current);
                             Inventory.listUpdate = true;
-                            Item.NewItem((int)player.Center.X, (int)player.Center.Y, Current.width, Current.height, Current.itemType, Current.itemStyle, Item.Owner_World);
+                            //Item.NewItem((int)player.Center.X, (int)player.Center.Y, Current.width, Current.height, Current.itemType, Current.itemStyle, Item.Owner_World);
                         }
                         goto default;
                     case "Close":
