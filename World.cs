@@ -19,10 +19,9 @@ namespace GenMapViewer
                 ticks++;
             else ticks = 0;
 
-            if (Main.fg.Where(t => t != null).Count() < 100 && ticks % 60 == 0 && Main.rand.NextBool())
+            if (Main.fg.Where(t => t != null).Count() < 100 && ticks % 10 == 0 && Main.rand.NextBool())
             {
                 var fg = new Foreground();
-                fg.Initialize();
             }
         }
     }

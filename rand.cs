@@ -8,32 +8,38 @@ namespace GenMapViewer
 {
     public class rand
     {
-        private int seed = int.MinValue;
+        public rand()
+        {
+            seed = DateTime.Now.Millisecond;
+            r = random();
+        }
+        private int seed;
+        private Random r;
         private Random random()
         {
             return new Random(seed); 
         }
         internal void Update()
         {
-            if (seed < int.MaxValue)
-                seed++;
+            if (seed + 19753 < int.MaxValue)
+                seed += 19753;
             else seed = int.MinValue;
         }
         public int Next(int max)
         {
-            return random().Next(0, max);
+            return r.Next(0, max);
         }
         public int Next(int min, int max)
         {
-            return random().Next(min, max);
+            return r.Next(min, max);
         }
         public float NextFloat()
         {
-            return (float)random().NextDouble();
+            return (float)r.NextDouble();
         }
         public bool NextBool()
         {
-            return Next(3) == 1;
+            return Next(2) == 1;
         }
     }
 }

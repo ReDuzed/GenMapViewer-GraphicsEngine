@@ -14,6 +14,7 @@ namespace GenMapViewer
     {
         public Foreground()
         { 
+            Initialize();
         }
         private float moveSpeed;
         private float moveMultiplier => 2.5f;
@@ -39,9 +40,9 @@ namespace GenMapViewer
                 width = 2;
                 height = 18;
             }
-            color = Main.types[Main.rand.Next(1, 3)];
-            moveSpeed = Main.rand.NextFloat() * moveMultiplier;
-            position = new Vector2(Main.rand.Next(0, Main.ScreenWidth - width), -height);
+            color = Main.types[Main.rand.Next(4)];
+            moveSpeed = Math.Max(Main.rand.NextFloat() * moveMultiplier, 1f);
+            position = new Vector2(Main.rand.NextFloat() * Main.ScreenWidth, -height);
         }
         public void Update()
         {
@@ -65,6 +66,8 @@ namespace GenMapViewer
         }
         public void Kill()
         {
+            if (Main.fg[whoAmI] == null)
+                return;
             Main.fg[whoAmI].active = false;
             Main.fg[whoAmI] = null;
         }

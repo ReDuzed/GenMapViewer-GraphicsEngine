@@ -193,6 +193,7 @@ namespace GenMapViewer
                             square[2] = new SquareBrush(ScreenWidth, 0, 100, ScreenHeight);
                             square[3] = new SquareBrush(0, ScreenHeight, ScreenWidth - 200, 100);
                             ground[0] = new Background(0, 0, ScreenWidth, ScreenHeight, GUI.Texture("Alpha Tiles Scratches"));
+                            npc[0] = new SampleNPC();
                             int num = skill.Length + 6;
                             const byte buffer = 8;
                             for (int i = 0; i < 5; i++)
@@ -225,7 +226,7 @@ namespace GenMapViewer
                 //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
             };
             //Dispatcher.BeginInvoke(method, DispatcherPriority.Render, null);
-            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 120), DispatcherPriority.ApplicationIdle, method, Dispatcher);
+            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 1000), DispatcherPriority.Send, method, Dispatcher);
         }
         #endregion
         #region update and draw
@@ -280,6 +281,7 @@ namespace GenMapViewer
             var m = MouseDevice.GetPosition(grid_main);
             MousePosition = new Vector2((float)m.X, (float)m.Y);
             WorldMouse = new Vector2(MousePosition.X - ScreenX, MousePosition.Y - ScreenY);
+            rand.Update();
             World.Spawn();
             foreach (Player p in player.Where(t => t != null))
             {
@@ -290,7 +292,7 @@ namespace GenMapViewer
                 p.colRight = false;
                 p.colLeft = false;
             }
-            foreach (Foreground f in fg.Where(t => t != null && t.init))
+            foreach (Foreground f in fg.Where(t => t != null))
                 f.Update();
             foreach (Item i in item.Where(t => t != null))
             {
