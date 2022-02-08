@@ -32,80 +32,30 @@ namespace GenMapViewer
             Instance = this;
             InitializeComponent();
             Initialize();
-            LogoDisplay();
+            MainMenu();
         }
         #region variables
         public static Main Instance;
-        public static Tile[,] tile = new Tile[ScreenWidth / 16, ScreenHeight / 16];
-        public static SquareBrush[] square = new SquareBrush[256];
-        public static Background[] ground = new Background[501];
-        public static Dust[] dust = new Dust[1001]; 
-        public static NPC[] npc = new NPC[501];
-        public static Projectile[] projectile = new Projectile[1001];
-        public static GUI[] gui = new GUI[129];
-        public static GUI[,] skill = new GUI[10, 4];
-        public static Item[] item = new Item[501];
-        public static Player[] player = new Player[256];
-        private bool once = true;
-        public static int ScreenWidth;
-        public static int ScreenHeight;
-        public static Bitmap level;
         public static bool Logo = true;  
+        private static Thread mainMenu;
+        public static int ScreenWidth => 800;
+        public static int ScreenHeight => 600;
         Action method2;
-        public static int frameRate
-        {
-            get { return 1000 / 120; }
-        }
-        public static float ScreenX
-        {
-            get;
-            private set;
-        }
-        public static float ScreenY
-        {
-            get;
-            private set;
-        }
-        public static MouseDevice MouseDevice
-        {
-            get { return Mouse.PrimaryDevice; }
-        }
-        public static MouseDevice OldMouse;
-        public Vector2 ScreenPosition
-        {
-            get { return new Vector2(ScreenX, ScreenY); }
-        }
-        public static System.Drawing.Color[] types = new System.Drawing.Color[]
-        {
-            System.Drawing.Color.Black,
-            System.Drawing.Color.White,
-            System.Drawing.Color.Red,
-            System.Drawing.Color.Brown,
-            System.Drawing.Color.Green
-        };
-        public static rand rand;
-        public static Player LocalPlayer
-        {
-            get { return player[0]; }
-        }
-        float ticks = 0;
-        public static Vector2 MousePosition;
-        public static Vector2 WorldMouse;
-        private bool begin = false;
+        private int frameRate => 1000 / 60;
         #endregion
         #region base functions
-        private void LogoDisplay()
+        private void MainMenu()
         {
             method2 = null;
             //  Todo draw thread separate from input thread
-            Thread thread = new Thread(t =>
+            mainMenu = new Thread(t =>
             {
                 Main m = (Main)t;
                 method2 = delegate ()
                 {
                     if (!Main.Logo)
                         return;
-                    System.Threading.Thread.Sleep(Main.frameRate);
+                    System.Threading.Thread.Sleep(frameRate);
                     using (Bitmap bmp = new Bitmap((int)m.logo.Width, (int)m.logo.Height))
                     {
                         using (Graphics graphic = Graphics.FromImage(bmp))
@@ -121,53 +71,20 @@ namespace GenMapViewer
                 };
                 m.logo.Dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
             });
-            thread.IsBackground = true;
-            thread.Start(this);
-        }
-        private new bool KeyUp(Key key)
-        {
-            return Keyboard.IsKeyUp(key);
-        }
-        private new bool KeyDown(Key key)
-        {
-            return Keyboard.IsKeyDown(key);
-        }
-        private void PreDraw(Bitmap bmp, Graphics gfx)
-        {
-            ticks += Keyboard.IsKeyDown(Key.NumPad0) ? 0.05f : 0.017f;
-            float cos = ScreenWidth - 50 + 40 * (float)Math.Cos(ticks);
-            float sin = 10 + 40 * (float)Math.Sin(ticks);
-            gfx.DrawLine(Pens.White, ScreenWidth - 50, 10, (int)cos, (int)sin);
-            gfx.DrawRectangle(Pens.White, new System.Drawing.Rectangle(ScreenWidth - 50, 10, 40, 40));
+            mainMenu.IsBackground = true;
+            mainMenu.Start(this);
         }
         private void Matrix_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             Application.Current.Shutdown();
         }
-        public static System.Drawing.Image Texture(string pathNoExt)
-        {
-            return System.Drawing.Image.FromFile(@"Textures\" + pathNoExt + ".png");
-        }
         private void Main_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!begin && !e.Handled && !e.IsRepeat && e.Key.Equals(Key.Enter))
+            if (!e.Handled && !e.IsRepeat && e.Key.Equals(Key.Enter))
             {
-                begin = true;
+                Logo = false;
                 Button_Click(this, null);
             }
-        }
-        private Dictionary<Order, Action> drawOrder = new Dictionary<Order, Action>();
-        enum Order : byte
-        {
-            Player,
-            Foreground,
-            Item,
-            Projectile,
-            NPC,
-            Dust,
-            Brush,
-            Background,
-            Misc
         }
         private void Button_Click(object sender, RoutedEventArgs e)
         {
@@ -230,11 +147,11 @@ namespace GenMapViewer
         #region update and draw
         private void Initialize()
         {
-            ScreenWidth = (int)graphic.Width;
-            ScreenHeight = (int)graphic.Height;
-            rand = new rand();
         }
-        private void Draw(Bitmap bmp, Graphics graphic, bool CAMERA_Follow = false)
+        private void PreDraw(Bitmap bmp, Graphics gfx)
+        {
+        }
+        private void Draw(Bitmap bmp, Graphics graphic, bool CAMERA_Follow = false, Vector2 CAMERA = Vector2.Zero)
         {
             if (CAMERA_Follow)
             { 
