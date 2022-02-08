@@ -37,16 +37,14 @@ namespace GenMapViewer
         #region variables
         public static Main Instance;
         public static bool Logo = true;  
+        private static Thread mainMenu;
         public static int ScreenWidth => 800;
         public static int ScreenHeight => 600;
         public float ScreenX, ScreenY;
-        int frameRate => 1000 / 60;
-        Thread mainMenu;
-        bool init = false;
+        private bool init = false;
         Action method2;
-        
-        public const float defaultFrameRate = 1000 / 120;
-        public static float FrameRate = defaultFrameRate;
+        private int frameRate => 1000 / 60;
+        public static float FrameRate = 1000 / 120;
         #endregion
         #region base functions
         private void MainMenu()
