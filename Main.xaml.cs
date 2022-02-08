@@ -25,7 +25,7 @@ namespace GenMapViewer
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class Main : Window
+    public abstract partial class Main : Window
     {
         public Main()
         {
@@ -40,8 +40,14 @@ namespace GenMapViewer
         private static Thread mainMenu;
         public static int ScreenWidth => 800;
         public static int ScreenHeight => 600;
+        public float ScreenX, ScreenY;
+        int frameRate => 1000 / 60;
+        Thread mainMenu;
+        bool init = false;
         Action method2;
-        private int frameRate => 1000 / 60;
+        
+        public const float defaultFrameRate = 1000 / 120;
+        public static float FrameRate = defaultFrameRate;
         #endregion
         #region base functions
         private void MainMenu()
