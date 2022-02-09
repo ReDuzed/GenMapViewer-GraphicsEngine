@@ -22,29 +22,42 @@ using System.Windows.Threading;
 
 namespace GenMapViewer
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
-    public abstract partial class Main : Window
+    public partial class Main
     {
-        public Main()
+        ImageSource imgSource;
+        Dispatcher dispatcher;
+        public Main(ImageSource image, Dispatcher dispatcher)
         {
-            Instance = this;
-            InitializeComponent();
-            LoadResources();
-            MainMenu();
+            this.imgSource = image;
+            this.dispatcher = dispatcher;
+        }
+        public void Start()
+        {
+            Core.Start(imgSource, dispatcher);
+        }
+    }
+    class Core : Function
+    {
+        internal static void Start(ImageSource imgSrc, Dispatcher dispatcher)
+        {
+            Instance = new Core();
+            Instance.LoadResources();
+            Instance.MainMenu();
         }
         #region variables
-        public static Main Instance;
+        public static Core Instance;
         public static bool Logo = true;  
         public static int ScreenWidth => 800;
         public static int ScreenHeight => 600;
         public float ScreenX, ScreenY;
-        int frameRate => 1000 / 60;
-        Thread mainMenu;
-        bool init = false;
-        Action method2;
-        
+        static int frameRate => 1000 / 60;
+        static Thread mainMenu;
+        static bool init = false;
+        static Action method2;
+        static ImageSource imgSrc;
+        static Dispatcher dispatcher;
+        public Camera camera1 = new Camera();
+
         public const float defaultFrameRate = 1000 / 120;
         public static float FrameRate = defaultFrameRate;
         #endregion
@@ -61,51 +74,46 @@ namespace GenMapViewer
                     if (!Logo)
                         return;
                     System.Threading.Thread.Sleep(frameRate);
-                    using (Bitmap bmp = new Bitmap((int)m.logo.Width, (int)m.logo.Height))
+                    using (Bitmap bmp = new Bitmap((int)imgSrc.Width, (int)imgSrc.Height))
                     {
                         using (Graphics graphic = Graphics.FromImage(bmp))
                         {
+                            if (Keyboard.IsKeyDown(Key.Enter))
+                            {
+                                Logo = false;
+                                PrimaryRoot();
+                                return;
+                            }
                             TitleScreen(bmp, graphic);
                         }
-                        int stride = (int)m.logo.Width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
-                        var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, (int)m.logo.Width, (int)m.logo.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                        m.logo.Source = BitmapSource.Create((int)m.logo.Width, (int)m.logo.Height, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * (int)m.logo.Height, stride);
+                        int stride = (int)imgSrc.Width * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
+                        var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, (int)imgSrc.Width, (int)imgSrc.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                        imgSrc = BitmapSource.Create((int)imgSrc.Width, (int)imgSrc.Height, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * (int)imgSrc.Height, stride);
                         bmp.UnlockBits(data);
                     }
-                    m.logo.Dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
+                    dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
                 };
-                m.logo.Dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
+                dispatcher.BeginInvoke(method2, System.Windows.Threading.DispatcherPriority.Background);
             });
             mainMenu.IsBackground = true;
             mainMenu.Start(this);
         }
-        private void Matrix_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-        private void Main_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (!e.Handled && !e.IsRepeat && e.Key.Equals(Key.Enter))
-            {
-                Logo = false;
-                Button_Click(this, null);
-            }
-        }
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void PrimaryRoot()
         {
             Logo = false;
-            logo.IsEnabled = false;
-            logo.Visibility = Visibility.Hidden;
             EventHandler draw = null;
             draw = (object o, EventArgs args) => 
             {
                 using (Bitmap bmp = new Bitmap(ScreenWidth, ScreenHeight))
                 {
                     using (Graphics graphic = Graphics.FromImage(bmp))
-                        Draw(bmp, graphic);
+                    {
+                        if (PreDraw(bmp, graphic, camera1))
+                            Draw(bmp, graphic);
+                    }
                     int stride = ScreenWidth * ((PixelFormats.Bgr24.BitsPerPixel + 7) / 8);
                     var data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, ScreenWidth, ScreenHeight), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    graphic.Source = BitmapSource.Create(ScreenWidth, ScreenHeight, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * ScreenHeight, stride);
+                    imgSrc = BitmapSource.Create(ScreenWidth, ScreenHeight, 96f, 96f, PixelFormats.Bgr24, null, data.Scan0, stride * ScreenHeight, stride);
                     bmp.UnlockBits(data);
                 }
             };
@@ -119,22 +127,9 @@ namespace GenMapViewer
                 }
                 Update();
             };
-            new DispatcherTimer(TimeSpan.FromMilliseconds(FrameRate), DispatcherPriority.Render, draw, Dispatcher);
-            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 500), DispatcherPriority.Send, logic, Dispatcher);
+            new DispatcherTimer(TimeSpan.FromMilliseconds(FrameRate), DispatcherPriority.Render, draw, dispatcher);
+            new DispatcherTimer(TimeSpan.FromMilliseconds(1000 / 500), DispatcherPriority.Send, logic, dispatcher);
         }
-        #endregion
-        #region overrides
-        public abstract bool PreDraw(Bitmap bitmap, Graphics graphics, Camera CAMERA, bool CAMERA_FOLLOW = false);
-        public abstract void Draw(Bitmap bitmap, Graphics graphics);
-        public abstract void Camera(Graphics graphics, Camera CAMERA);
-        public abstract void Update();
-        public abstract void Initialize();
-        public abstract void LoadResources();
-        public abstract void TitleScreen(Bitmap bitmap, Graphics graphics);
-        #endregion
-    }
-    public class Core : Main
-    {
         public override void LoadResources()
         {
         }
@@ -151,7 +146,7 @@ namespace GenMapViewer
             { 
                 Camera(graphics, CAMERA);
             }
-            return false;
+            return true;
         }
         public override void Draw(Bitmap bitmap, Graphics graphics)
         {
@@ -167,6 +162,8 @@ namespace GenMapViewer
         }
         public override void Camera(Graphics graphic, Camera CAMERA)
         {
+            if (CAMERA == null)
+                return;
             if (CAMERA.isMoving)
             {
                 ScreenX -= CAMERA.velocity.X;
@@ -178,6 +175,17 @@ namespace GenMapViewer
                 ScreenY + CAMERA.velocity.Y,
                 System.Drawing.Drawing2D.MatrixOrder.Append);
         }
+        #endregion
+    }
+    abstract class Function
+    {
+        public abstract bool PreDraw(Bitmap bitmap, Graphics graphics, Camera CAMERA, bool CAMERA_FOLLOW = false);
+        public abstract void Draw(Bitmap bitmap, Graphics graphics);
+        public abstract void Camera(Graphics graphics, Camera CAMERA);
+        public abstract void Update();
+        public abstract void Initialize();
+        public abstract void LoadResources();
+        public abstract void TitleScreen(Bitmap bitmap, Graphics graphics);
     }
     public class Camera
     {

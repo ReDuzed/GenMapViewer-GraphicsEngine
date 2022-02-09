@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "native", "deps\native.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMV Foundation", "..\GMV Foundation\GMV Foundation.csproj", "{D5B1BAD0-0A59-46C7-961B-D3268605D0F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "gmvsample", "..\gmvsample\gmvsample.csproj", "{7409C241-2B17-4B1E-A780-AF2737A5F106}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D5B1BAD0-0A59-46C7-961B-D3268605D0F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5B1BAD0-0A59-46C7-961B-D3268605D0F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5B1BAD0-0A59-46C7-961B-D3268605D0F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7409C241-2B17-4B1E-A780-AF2737A5F106}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7409C241-2B17-4B1E-A780-AF2737A5F106}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7409C241-2B17-4B1E-A780-AF2737A5F106}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7409C241-2B17-4B1E-A780-AF2737A5F106}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
